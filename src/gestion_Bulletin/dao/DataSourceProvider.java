@@ -1,10 +1,9 @@
-package dao;
+package gestion_Bulletin.dao;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Objects;
 import java.util.Properties;
 
 public final class DataSourceProvider {

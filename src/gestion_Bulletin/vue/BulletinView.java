@@ -1,7 +1,8 @@
-package vue;
+package gestion_Bulletin.vue;
 
-import model.Bulletin;
-import service.BulletinService;
+import gestion_Bulletin.model.Bulletin;
+import gestion_Bulletin.model.NoteDetail;
+import gestion_Bulletin.service.BulletinService;
 
 import java.text.DecimalFormat;
 import java.time.format.DateTimeFormatter;
@@ -75,7 +76,7 @@ public class BulletinView {
                     System.out.println("Conflit d'insertion détecté (autre processus). Récupération de l'enregistrement existant...");
                     Optional<Bulletin> again = service.getParEtudiantEtPeriode(etuId, periode);
                     if (again.isPresent()) {
-                        afficherBulletin(again.get());
+                        afficherBulletinComplet(again.get());
                         return;
                     } else {
                         throw ex;
@@ -87,7 +88,7 @@ public class BulletinView {
 
             if (existedBefore) System.out.println("Bulletin mis à jour :");
             else System.out.println("Bulletin créé :");
-            afficherBulletin(result);
+            afficherBulletinComplet(result);
         } catch (NumberFormatException ex) {
             System.out.println("Id étudiant invalide.");
         }
@@ -115,7 +116,7 @@ public class BulletinView {
 
             Bulletin persisted = service.creeBulletin(b);
             System.out.println("Bulletin persisté :");
-            afficherBulletin(persisted);
+            afficherBulletinComplet(persisted);
         } catch (NumberFormatException ex) {
             System.out.println("Id étudiant invalide.");
         } catch (Exception ex) {
@@ -134,7 +135,7 @@ public class BulletinView {
             }
             Bulletin b = ob.get();
             System.out.println("Bulletin courant :");
-            afficherBulletin(b);
+            afficherBulletinComplet(b);
 
             Double moyenne = lireDoubleNullable("Nouvelle moyenne étudiant (ou vide pour laisser) : ");
             Double moyenneClasse = lireDoubleNullable("Nouvelle moyenne classe (ou vide pour laisser) : ");
@@ -145,7 +146,7 @@ public class BulletinView {
             service.update(b);
             Optional<Bulletin> updated = service.getParEtudiantEtPeriode(b.getEtudiantId(), b.getPeriode());
             System.out.println("Bulletin mis à jour :");
-            afficherBulletin(updated.orElse(b));
+            afficherBulletinComplet(updated.orElse(b));
         } catch (NumberFormatException ex) {
             System.out.println("Id invalide.");
         } catch (Exception ex) {
@@ -158,7 +159,7 @@ public class BulletinView {
             System.out.print("Id bulletin : ");
             int id = Integer.parseInt(scanner.nextLine().trim());
             Optional<Bulletin> ob = service.getBulletin(id);
-            if (ob.isPresent()) afficherBulletin(ob.get());
+            if (ob.isPresent()) afficherBulletinComplet(ob.get());
             else System.out.println("Aucun bulletin trouvé pour id=" + id);
         } catch (NumberFormatException ex) {
             System.out.println("Id invalide.");
@@ -176,7 +177,7 @@ public class BulletinView {
                 return;
             }
             Optional<Bulletin> ob = service.getParEtudiantEtPeriode(etuId, periode);
-            if (ob.isPresent()) afficherBulletin(ob.get());
+            if (ob.isPresent()) afficherBulletinComplet(ob.get());
             else System.out.println("Aucun bulletin trouvé pour l'étudiant " + etuId + " et la période '" + periode + "'.");
         } catch (NumberFormatException ex) {
             System.out.println("Id étudiant invalide.");
@@ -220,27 +221,54 @@ public class BulletinView {
         }
     }
 
-    /* ----- affichages helpers ----- */
 
-    private void afficherBulletin(Bulletin b) {
-        System.out.println("--------------------------------------------------");
-        System.out.println("Bulletin id   : " + safe(b.getId()));
-        System.out.println("Étudiant id   : " + safe(b.getEtudiantId()));
-        System.out.println("Période       : " + safe(b.getPeriode()));
-        System.out.println("Moyenne élève : " + formatNullableDouble(b.getMoyenne()));
-        System.out.println("Moyenne classe: " + formatNullableDouble(b.getMoyennDelaClasse()));
-        if (b.getCreatedAt() != null) {
-            System.out.println("Créé le       : " + dtf.format(b.getCreatedAt().toLocalDateTime()));
+    private void afficherBulletinComplet(Bulletin b) {
+        System.out.println("\n╔════════════════════════════════════════════════════════════════╗");
+        System.out.println("║                       BULLETIN SCOLAIRE                        ║");
+        System.out.println("╠════════════════════════════════════════════════════════════════╣");
+        System.out.printf("║ Étudiant    : %-48s ║%n", b.getEtudiantNomComplet());
+        System.out.printf("║ Classe      : %-48s ║%n", safe(b.getClasseNiveau()));
+        System.out.printf("║ Période     : %-48s ║%n", safe(b.getPeriode()));
+        System.out.println("╠════════════════════════════════════════════════════════════════╣");
+        System.out.println("║                       DÉTAIL DES NOTES                         ║");
+        System.out.println("╠═══════════════════════════╤════════╤═══════════════════════════╣");
+        System.out.println("║ Matière                   │ Note   │ Enseignant                ║");
+        System.out.println("╠═══════════════════════════╪════════╪═══════════════════════════╣");
+
+        List<NoteDetail> notes = service.getNotesAvecEnseignants(b.getEtudiantId(), b.getPeriode());
+        for (NoteDetail nd : notes) {
+            System.out.printf("║ %-25s │ %-6s │ %-25s ║%n",
+                    truncate(nd.getMatiere(), 25),
+                    formatNullableDouble(nd.getValeur()),
+                    truncate(nd.getEnseignantNomComplet(), 25));
         }
-        System.out.println("--------------------------------------------------");
+
+        System.out.println("╠═══════════════════════════╧════════╧═══════════════════════════╣");
+        System.out.printf("║ Moyenne élève      : %-40s  ║%n", formatNullableDouble(b.getMoyenne()));
+        System.out.printf("║ Moyenne de classe  : %-40s  ║%n", formatNullableDouble(b.getMoyennDelaClasse()));
+        System.out.println("╠════════════════════════════════════════════════════════════════╣");
+        if (b.getCreatedAt() != null) {
+            System.out.printf("║ Généré le   : %-48s ║%n", dtf.format(b.getCreatedAt().toLocalDateTime()));
+        }
+        System.out.printf("║ Bulletin N° : %-48s ║%n", safe(b.getId()));
+        System.out.println("╚════════════════════════════════════════════════════════════════╝");
+    }
+
+    private String truncate(String str, int maxLength) {
+        if (str == null) return "";
+        return str.length() > maxLength ? str.substring(0, maxLength - 3) + "..." : str;
     }
 
     private void afficherResume(Bulletin b) {
         String m = formatNullableDouble(b.getMoyenne());
         String mc = formatNullableDouble(b.getMoyennDelaClasse());
         String created = b.getCreatedAt() == null ? "-" : dtf.format(b.getCreatedAt().toLocalDateTime());
-        System.out.printf("id=%s | etu=%s | periode=%s | moy=%s | moy_cl=%s | créé=%s%n",
-                safe(b.getId()), safe(b.getEtudiantId()), safe(b.getPeriode()), m, mc, created);
+        System.out.printf("║ %-20s │ %-10s │ Moy: %-6s │ Classe: %-6s │ %s%n",
+                b.getEtudiantNomComplet(),
+                safe(b.getPeriode()),
+                m,
+                mc,
+                created);
     }
 
     private String formatNullableDouble(Double v) {

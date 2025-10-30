@@ -1,6 +1,6 @@
-package dao;
+package gestion_Bulletin.dao;
 
-import model.Bulletin;
+import gestion_Bulletin.model.Bulletin;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -31,7 +31,9 @@ public class BulletinDao {
                 Timestamp ts = rs.getTimestamp("created_at");
                 if (ts != null) b.setCreatedAt(ts.toInstant().atOffset(OffsetDateTime.now().getOffset()));
             }
-            return b;
+
+            return findById(b.getId()).orElse(b);
+
         } catch (SQLException ex) {
             throw new RuntimeException("Erreur lors de l'insertion du bulletin", ex);
         }
@@ -51,7 +53,12 @@ public class BulletinDao {
     }
 
     public Optional<Bulletin> findById(int id) {
-        String sql = "SELECT id, id_etudiant, periode, moyenne, moyenne_de_la_classe, created_at FROM bulletin WHERE id = ?";
+        String sql = "SELECT b.id, b.id_etudiant, b.periode, b.moyenne, b.moyenne_de_la_classe, b.created_at, " +
+                "       e.nom as etudiant_nom, e.prenom as etudiant_prenom, c.niveau as classe_niveau " +
+                "FROM bulletin b " +
+                "JOIN etudiant e ON b.id_etudiant = e.id " +
+                "LEFT JOIN Classe c ON e.classe_id = c.id_classe " +
+                "WHERE b.id = ?";
         try (Connection c = ds.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, id);
@@ -75,8 +82,12 @@ public class BulletinDao {
     }
 
     public Optional<Bulletin> findByEtudiantAndPeriode(int etudiantId, String periode) {
-        String sql = "SELECT id, id_etudiant, periode, moyenne, moyenne_de_la_classe, created_at " +
-                "FROM bulletin WHERE id_etudiant = ? AND periode = ?";
+        String sql =    "SELECT b.id, b.id_etudiant, b.periode, b.moyenne, b.moyenne_de_la_classe, b.created_at, " +
+                "       e.nom as etudiant_nom, e.prenom as etudiant_prenom, c.niveau as classe_niveau " +
+                "FROM bulletin b " +
+                "JOIN etudiant e ON b.id_etudiant = e.id " +
+                "LEFT JOIN Classe c ON e.classe_id = c.id_classe " +
+                "WHERE b.id_etudiant = ? AND b.periode = ?";
         try (Connection c = ds.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, etudiantId);
@@ -94,8 +105,13 @@ public class BulletinDao {
     }
 
     public List<Bulletin> findByEtudiant(int etudiantId) {
-        final String sql = "SELECT id, id_etudiant, periode, moyenne, moyenne_de_la_classe, created_at " +
-                "FROM bulletin WHERE id_etudiant = ? ORDER BY periode DESC";
+        final String sql = "SELECT b.id, b.id_etudiant, b.periode, b.moyenne, b.moyenne_de_la_classe, b.created_at, " +
+                "       e.nom as etudiant_nom, e.prenom as etudiant_prenom, c.niveau as classe_niveau " +
+                "FROM bulletin b " +
+                "JOIN etudiant e ON b.id_etudiant = e.id " +
+                "LEFT JOIN Classe c ON e.classe_id = c.id_classe " +
+                "WHERE b.id_etudiant = ? " +
+                "ORDER BY b.periode DESC";
         List<Bulletin> list = new ArrayList<>();
         try (Connection c = ds.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
@@ -122,6 +138,17 @@ public class BulletinDao {
         if (!rs.wasNull()) b.setMoyennDelaClasse(mc);
         Timestamp ts = rs.getTimestamp("created_at");
         if (ts != null) b.setCreatedAt(ts.toInstant().atOffset(OffsetDateTime.now().getOffset()));
+        try {
+            String nom = rs.getString("etudiant_nom");
+            if(nom != null) b.setEtudiantNom(nom);
+
+            String prenom = rs.getString("etudiant_prenom");
+            if (prenom != null) b.setEtudiantPrenom(prenom);
+            String classe = rs.getString("classe_niveau");
+            if (classe != null) b.setClasseNiveau(classe);
+        } catch (SQLException e) {
+            e.getErrorCode();
+        }
         return b;
 
     }

@@ -1,4 +1,4 @@
-package model;
+package gestion_Bulletin.model;
 
 import java.time.OffsetDateTime;
 import java.util.Objects;
@@ -10,6 +10,10 @@ public class Bulletin {
     private Double moyenne;
     private Double moyennDelaClasse;
     private OffsetDateTime createdAt;
+
+    private String etudiantNom;
+    private String etudiantPrenom;
+    private String classeNiveau;
 
     public Bulletin(){}
 
@@ -42,6 +46,9 @@ public class Bulletin {
     public Double getMoyenne() {
         return moyenne;
     }
+    public String getEtudiantNom(){return etudiantNom;}
+    public String getEtudiantPrenom(){return etudiantPrenom;}
+    public String getClasseNiveau(){return classeNiveau;}
 
     public void setEtudiantId(Integer etudiantId) {
         this.etudiantId = etudiantId;
@@ -57,6 +64,16 @@ public class Bulletin {
     }
     public void setPeriode(String periode) {
         this.periode = periode;
+    }
+    public void setEtudiantNom(String etudiantNom){this.etudiantNom = etudiantNom;}
+    public void setEtudiantPrenom(String etudiantPrenom){this.etudiantPrenom = etudiantPrenom;}
+    public void setClasseNiveau(String classeNiveau){this.classeNiveau = classeNiveau;}
+
+    public String getEtudiantNomComplet() {
+        if (etudiantNom != null && etudiantPrenom != null) {
+            return etudiantPrenom + " " + etudiantNom;
+        }
+        return "Étudiant #" + etudiantId;
     }
 
     @Override
@@ -82,5 +99,7 @@ public class Bulletin {
     public int hashCode() {
         return Objects.hash(id);
     }
+
+
 
 }

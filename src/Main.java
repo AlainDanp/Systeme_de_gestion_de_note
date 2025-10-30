@@ -1,7 +1,7 @@
-import dao.BulletinDao;
-import dao.DataSourceProvider;
-import service.BulletinServiceImpl;
-import vue.BulletinView;
+import gestion_Bulletin.dao.BulletinDao;
+import gestion_Bulletin.dao.DataSourceProvider;
+import gestion_Bulletin.service.BulletinServiceImpl;
+import gestion_Bulletin.vue.BulletinView;
 
 import javax.sql.DataSource;
 import java.util.Scanner;
