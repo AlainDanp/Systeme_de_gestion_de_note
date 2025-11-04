@@ -1,7 +1,7 @@
-package gestion_Matier.dao;
+package gestion_Matiere.dao;
 
 
-import gestion_Matier.model.Matiere;
+import gestion_Matiere.model.Matiere;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -26,10 +26,7 @@ public class MatiereDao {
             ps.setString(1, matiere.getNom());
             ps.setInt(2, matiere.getIdEnseignant());
             ps.executeUpdate();
-
-            // Retourner la matière avec les infos enrichies
             return findByNom(matiere.getNom()).orElse(matiere);
-
         } catch (SQLException ex) {
             throw new RuntimeException("Erreur lors de l'insertion de la matière", ex);
         }

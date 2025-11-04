@@ -1,6 +1,6 @@
-package gestion_Matier.service;
+package gestion_Matiere.service;
 
-import gestion_Matier.model.Matiere;
+import gestion_Matiere.model.Matiere;
 
 import java.util.List;
 import java.util.Optional;

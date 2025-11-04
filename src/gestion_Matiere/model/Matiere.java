@@ -1,4 +1,4 @@
-package gestion_Matier.model;
+package gestion_Matiere.model;
 
 import java.util.Objects;
 

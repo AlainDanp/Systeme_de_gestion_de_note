@@ -1,7 +1,7 @@
-package gestion_Matier.service;
+package gestion_Matiere.service;
 
-import gestion_Matier.dao.MatiereDao;
-import gestion_Matier.model.Matiere;
+import gestion_Matiere.dao.MatiereDao;
+import gestion_Matiere.model.Matiere;
 
 import javax.sql.DataSource;
 import java.sql.Connection;

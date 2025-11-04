@@ -1,8 +1,8 @@
-package gestion_Matier.vue;
+package gestion_Matiere.vue;
 
-import gestion_Matier.model.Matiere;
-import gestion_Matier.service.EnseignantInfo;
-import gestion_Matier.service.MatiereService;
+import gestion_Matiere.model.Matiere;
+import gestion_Matiere.service.EnseignantInfo;
+import gestion_Matiere.service.MatiereService;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,54 +20,37 @@ public class MatiereView {
 
     public void menu() {
         while (true) {
-            afficherMenu();
-            String choix = scanner.nextLine().trim();
-
+            System.out.println("\n╔════════════════════════════════════════════════════════════════╗");
+            System.out.println("║                    GESTION DES MATIÈRES                        ║");
+            System.out.println("╠════════════════════════════════════════════════════════════════╣");
+            System.out.println("║  1. Ajouter une matière                                        ║");
+            System.out.println("║  2. Modifier une matière (changer l'enseignant)                ║");
+            System.out.println("║  3. Supprimer une matière                                      ║");
+            System.out.println("║  4. Voir une matière                                           ║");
+            System.out.println("║  5. Lister toutes les matières                                 ║");
+            System.out.println("║  6. Lister les matières d'un enseignant                        ║");
+            System.out.println("║  7. Statistiques d'une matière                                 ║");
+            System.out.println("║  0. Retour                                                     ║");
+            System.out.println("╚════════════════════════════════════════════════════════════════╝");
+            System.out.print("Votre choix > ");
+            String ch = scanner.nextLine().trim();
             try {
-                if (!traiterChoix(choix)) {
-                    break;
+                switch (ch) {
+                    case "1": ajouterMatiere(); break;
+                    case "2": modifierMatiere(); break;
+                    case "3": supprimerMatiere(); break;
+                    case "4": voirMatiere(); break;
+                    case "5": listerMatieres(); break;
+                    case "6": listerMatieresEnseignant(); break;
+                    case "7": afficherStatistiques(); break;
+                    case "0": return ;
+                    default:
+                        System.out.println("Choix invalide."); break;
                 }
-            } catch (IllegalArgumentException ex) {
-                System.out.println("Validation : " + ex.getMessage());
-                attendreEntree();
-            } catch (Exception ex) {
+            }catch (Exception ex){
                 System.out.println("Erreur : " + ex.getMessage());
-                attendreEntree();
             }
         }
-    }
-
-    private void afficherMenu() {
-        System.out.println("\n╔════════════════════════════════════════════════════════════════╗");
-        System.out.println("║                    GESTION DES MATIÈRES                        ║");
-        System.out.println("╠════════════════════════════════════════════════════════════════╣");
-        System.out.println("║  1. Ajouter une matière                                        ║");
-        System.out.println("║  2. Modifier une matière (changer l'enseignant)                ║");
-        System.out.println("║  3. Supprimer une matière                                      ║");
-        System.out.println("║  4. Voir une matière                                           ║");
-        System.out.println("║  5. Lister toutes les matières                                 ║");
-        System.out.println("║  6. Lister les matières d'un enseignant                        ║");
-        System.out.println("║  7. Statistiques d'une matière                                 ║");
-        System.out.println("║  0. Retour                                                     ║");
-        System.out.println("╚════════════════════════════════════════════════════════════════╝");
-        System.out.print("Votre choix > ");
-    }
-
-    private boolean traiterChoix(String choix) {
-        switch (choix) {
-            case "1": ajouterMatiere(); break;
-            case "2": modifierMatiere(); break;
-            case "3": supprimerMatiere(); break;
-            case "4": voirMatiere(); break;
-            case "5": listerMatieres(); break;
-            case "6": listerMatieresEnseignant(); break;
-            case "7": afficherStatistiques(); break;
-            case "0": return false;
-            default:
-                System.out.println("Choix invalide.");
-                attendreEntree();
-        }
-        return true;
     }
 
     private void ajouterMatiere() {
@@ -79,7 +62,7 @@ public class MatiereView {
         String nom = scanner.nextLine().trim();
 
         if (nom.isEmpty()) {
-            System.out.println("❌ Le nom est requis.");
+            System.out.println(" Le nom est requis.");
             attendreEntree();
             return;
         }

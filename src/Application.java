@@ -1,19 +1,44 @@
-
-
+import Admin.dao.AdminDao;
+import Admin.vue.MenuAdminView;
+import Auhentifcation.AuthenticationService;
+import Auhentifcation.AuthenticationServiceImpl;
+import Auhentifcation.LoginView;
+import Auhentifcation.ProfilView;
+import MVC.Role;
+import MVC.User;
 import gestion_Bulletin.dao.BulletinDao;
 import gestion_Bulletin.dao.DataSourceProvider;
 import gestion_Bulletin.service.BulletinService;
 import gestion_Bulletin.service.BulletinServiceImpl;
 import gestion_Bulletin.vue.BulletinView;
-import gestion_Matier.dao.MatiereDao;
-import gestion_Matier.service.MatiereService;
-import gestion_Matier.service.MatiereServiceImpl;
-import gestion_Matier.vue.MatiereView;
+import gestion_Classe.dao.ClasseDao;
+import gestion_Classe.service.ClasseService;
+import gestion_Classe.service.ClasseServiceImpl;
+import gestion_Classe.vue.ClasseView;
+import gestion_Enseignant.dao.EnseignantDao;
+import gestion_Enseignant.service.EnseignantService;
+import gestion_Enseignant.service.EnseignantServiceImpl;
+import gestion_Enseignant.vue.EnseignantView;
+import gestion_Enseignant.vue.MenuEnseignantView;
+import gestion_Etudiant.dao.EtudiantDao;
+import gestion_Etudiant.service.EtudiantService;
+import gestion_Etudiant.service.EtudiantServiceImpl;
+import gestion_Etudiant.vue.EtudiantView;
+import gestion_Etudiant.vue.MenuEtudiantView;
+import gestion_Matiere.dao.MatiereDao;
+import gestion_Matiere.service.MatiereService;
+import gestion_Matiere.service.MatiereServiceImpl;
+import gestion_Matiere.vue.MatiereView;
+import gestion_Note.dao.NoteDao;
+import gestion_Note.service.NoteService;
+import gestion_Note.service.NoteServiceImpl;
+import gestion_Note.vue.NoteView;
 
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.Scanner;
 
 
@@ -22,29 +47,46 @@ public class Application {
     private DataSource dataSource;
     private Scanner scanner;
 
-
+    private AdminDao adminDao;
     private BulletinDao bulletinDao;
-//    private NoteDao noteDao;
+    private NoteDao noteDao;
     private MatiereDao matiereDao;
+    private EnseignantDao enseignantDao;
+    private EtudiantDao etudiantDao;
+    private ClasseDao classeDao;
+
 
 
     private BulletinService bulletinService;
-//    private NoteService noteService;
+    private NoteService noteService;
     private MatiereService matiereService;
+    private EnseignantService enseignantService;
+    private ClasseService classeService;
+    private EtudiantService etudiantService;
+    private AuthenticationService authenticationService;
 
 
     private BulletinView bulletinView;
-//    private NoteView noteView;
+    private NoteView noteView;
     private MatiereView matiereView;
+    private ClasseView classeView;
+    private EnseignantView enseignantView;
+    private EtudiantView etudiantView;
+
+
+    private LoginView loginView;
+    private ProfilView profilView;
+
+    private MenuEnseignantView menuEnseignantView;
+    private MenuEtudiantView menuEtudiantView;
+    private MenuAdminView menuAdminView;
 
 
     private void initialiser() {
         System.out.println("Démarrage de l'application...");
 
-        // Initialisation du DataSource
         try {
             dataSource = DataSourceProvider.getDataSource();
-          //  System.out.println("DataSource initialisé");
         } catch (Exception e) {
             System.err.println("Erreur lors de l'initialisation du DataSource");
             e.printStackTrace();
@@ -60,36 +102,62 @@ public class Application {
 
         scanner = new Scanner(System.in);
 
+        adminDao = new AdminDao(dataSource);
         bulletinDao = new BulletinDao(dataSource);
-//        noteDao = new NoteDao(dataSource);
+        noteDao = new NoteDao(dataSource);
         matiereDao = new MatiereDao(dataSource);
+        enseignantDao = new EnseignantDao(dataSource);
+        etudiantDao = new EtudiantDao(dataSource);
+        classeDao = new ClasseDao(dataSource);
+
        // System.out.println(" DAO initialisés");
 
 
 
 
-//        noteService = new NoteServiceImpl(dataSource, noteDao);
+        noteService = new NoteServiceImpl(dataSource, noteDao);
         bulletinService = new BulletinServiceImpl(dataSource, bulletinDao);
         matiereService = new MatiereServiceImpl(dataSource, matiereDao);
+        enseignantService = new EnseignantServiceImpl(dataSource, enseignantDao);
+        etudiantService = new EtudiantServiceImpl(dataSource, etudiantDao);
+        classeService = new ClasseServiceImpl(dataSource, classeDao);
+        authenticationService = new AuthenticationServiceImpl(adminDao,enseignantDao, etudiantDao);
        // System.out.println("Services initialisés");
+
+        loginView = new LoginView(authenticationService, scanner);
+        profilView = new ProfilView(authenticationService, scanner);
+
 
         // Initialisation des Vues
         bulletinView = new BulletinView(bulletinService, scanner);
-//        noteView = new NoteView(noteService, scanner);
+        noteView = new NoteView(noteService, scanner);
+        classeView = new ClasseView(classeService, scanner);
         matiereView = new MatiereView(matiereService, scanner);
+        enseignantView = new EnseignantView(enseignantService, scanner);
+        etudiantView = new EtudiantView(etudiantService, scanner);
+
+        menuEnseignantView = new MenuEnseignantView(
+                authenticationService, scanner,
+                noteView, bulletinView, matiereView, profilView
+        );
+        menuEtudiantView = new MenuEtudiantView(
+                authenticationService, noteService, bulletinService,
+                profilView, scanner
+        );
+        menuAdminView = new MenuAdminView(
+                authenticationService, scanner,
+                enseignantView, etudiantView, classeView,
+                matiereView, noteView, bulletinView, profilView
+        );
+
         //System.out.println(" Vues initialisées");
-
-
-
 
         System.out.println("Application prête !\n");
 
 
     }
 
-    /**
-     * Teste la connexion à la base de données
-     */
+
     private boolean testerConnexion() {
         try (Connection conn = dataSource.getConnection()) {
             //System.out.println(" Connexion à la base de données réussie");
@@ -107,8 +175,25 @@ public class Application {
     public void demarrer() {
         initialiser();
         afficherBanniere();
-        menuPrincipal();
-        arreter();
+       while (true){
+           Optional<User> user =loginView.afficherLogin();
+
+           if (user.isEmpty()){
+               System.out.println("\n Au revoir !");
+               break;
+           }
+           User authenticatedUser = user.get();
+           if (authenticatedUser.getRole() == Role.ADMIN) {
+               menuAdminView.afficher();
+           } else if (authenticatedUser.getRole() == Role.ENSEIGNANT) {
+               menuEnseignantView.afficher();
+           } else if (authenticatedUser.getRole() == Role.ETUDIANT) {
+               menuEtudiantView.afficher();
+           } else {
+               System.out.println(" Rôle non reconnu");
+           }
+       }
+       arreter();
     }
 
     /**
@@ -118,7 +203,7 @@ public class Application {
         System.out.println("╔════════════════════════════════════════════════════════════════╗");
         System.out.println("║                                                                ║");
         System.out.println("║          SYSTÈME DE GESTION DES NOTES ETUDIANTS                ║");
-        System.out.println("║          Version 1.0                                           ║");
+        System.out.println("║          Version 2.0                                           ║");
         System.out.println("║                                                                ║");
         System.out.println("╚════════════════════════════════════════════════════════════════╝");
         System.out.println();
@@ -172,8 +257,7 @@ public class Application {
     private boolean traiterChoixMenuPrincipal(String choix) {
         switch (choix) {
             case "1":
-                System.out.println("\n⚠️  La gestion des notes sera disponible prochainement.");
-                attendreEntree();
+                noteView.menu();
                 break;
 
             case "2":
@@ -181,8 +265,7 @@ public class Application {
                 break;
 
             case "3":
-                System.out.println("\n⚠️  La gestion des étudiants sera disponible prochainement.");
-                attendreEntree();
+                etudiantView.menu();
                 break;
 
             case "4":
@@ -190,13 +273,11 @@ public class Application {
                 break;
 
             case "5":
-                System.out.println("\n⚠️  La gestion des enseignants sera disponible prochainement.");
-                attendreEntree();
+                enseignantView.menu();
                 break;
 
             case "6":
-                System.out.println("\n⚠️  La gestion des classes sera disponible prochainement.");
-                attendreEntree();
+                classeView.menu();
                 break;
 
             case "9":
@@ -223,7 +304,7 @@ public class Application {
         System.out.println("║                        À PROPOS                                ║");
         System.out.println("╠════════════════════════════════════════════════════════════════╣");
         System.out.println("║  Application   : Système de Gestion Scolaire                   ║");
-        System.out.println("║  Version       : 1.0.0                                         ║");
+        System.out.println("║  Version       : 2.0.0                                         ║");
         System.out.println("║  Date          : Octobre 2025                                  ║");
         System.out.println("║  Base de données : PostgreSQL                                  ║");
         System.out.println("║                                                                ║");

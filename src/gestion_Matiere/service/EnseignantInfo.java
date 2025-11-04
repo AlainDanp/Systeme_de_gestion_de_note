@@ -1,4 +1,4 @@
-package gestion_Matier.service;
+package gestion_Matiere.service;
 
 public class EnseignantInfo {
     private Integer id;
