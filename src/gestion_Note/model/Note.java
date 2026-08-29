@@ -146,4 +146,12 @@ public class Note {
     public int hashCode() {
         return Objects.hash(id);
     }
+
+    public Integer getIdEtudiant() {
+        return etudiantId;
+    }
+
+    public int getIdNote() {
+        return id;
+    }
 }

@@ -1,5 +1,7 @@
 package gestion_Bulletin.service;
 
+import Event.BulletinGeneratedEvent;
+import Event.EventDispatcher;
 import gestion_Bulletin.dao.BulletinDao;
 import gestion_Bulletin.model.Bulletin;
 import gestion_Bulletin.model.NoteDetail;
@@ -14,11 +16,21 @@ public class BulletinServiceImpl implements BulletinService {
 
         private final DataSource ds;
         private final BulletinDao bulletinDao;
+        private final EventDispatcher eventDispatcher;
+        private Integer currentUserId;
+         private String currentUserName;
+
 
         public BulletinServiceImpl(DataSource ds, BulletinDao bulletinDao) {
             this.ds = ds;
             this.bulletinDao = bulletinDao;
+            this.eventDispatcher = EventDispatcher.getInstance();
         }
+
+    public void setCurrentUser(Integer userId, String userName) {
+        this.currentUserId = userId;
+        this.currentUserName = userName;
+    }
 
     @Override
     public Bulletin genererEtEnregistrerBulletin(Integer etudiantId, String periode) {
@@ -130,15 +142,34 @@ public class BulletinServiceImpl implements BulletinService {
 
         @Override
         public Bulletin creeBulletin(Bulletin bulletin) {
-            if (bulletin.getEtudiantId() == null || bulletin.getPeriode() == null) {
-                throw new IllegalArgumentException("etudiantId et periode requis pour créer un bulletin");}
-            Optional<Bulletin> exist = bulletinDao.findByEtudiantAndPeriode(bulletin.getEtudiantId(), bulletin.getPeriode());
-            if (exist.isPresent()) {
-                bulletin.setId(exist.get().getId());
-                bulletinDao.update(bulletin);
-                return bulletinDao.findById(bulletin.getId()).orElse(bulletin);
-            } else {
-                return bulletinDao.save(bulletin);
+            validerBulletin(bulletin);
+
+            try (Connection c = ds.getConnection()) {
+                c.setAutoCommit(false);
+
+                try {
+                    Bulletin created = bulletinDao.save(bulletin);
+                    c.commit();
+
+                    //  Déclencher l'événement BULLETIN_GENERATED
+                    if (currentUserId != null && currentUserName != null) {
+                        BulletinGeneratedEvent event = new BulletinGeneratedEvent(
+                                currentUserId,
+                                currentUserName,
+                                created,
+                                created.getEtudiantNomComplet()
+                        );
+                        eventDispatcher.dispatch(event);
+                    }
+
+                    return created;
+
+                } catch (Exception e) {
+                    c.rollback();
+                    throw e;
+                }
+            } catch (SQLException ex) {
+                throw new RuntimeException("Erreur lors de la création du bulletin", ex);
             }
         }
 
@@ -176,6 +207,9 @@ public class BulletinServiceImpl implements BulletinService {
 
     @Override
         public List<Bulletin> listerParEtudiant(Integer etudiantId) {
+        if (etudiantId == null) {
+            throw new IllegalArgumentException("L'ID de l'étudiant est requis");
+        }
             return bulletinDao.findByEtudiant(etudiantId);
         }
 
@@ -183,4 +217,23 @@ public class BulletinServiceImpl implements BulletinService {
         private Double round2(double v) {
             return Math.round(v * 100.0) / 100.0;
         }
+
+    private void validerBulletin(Bulletin bulletin) {
+        if (bulletin.getIdEtudiant() == null) {
+            throw new IllegalArgumentException("L'ID de l'étudiant est requis");
+        }
+
+        if (bulletin.getPeriode() == null || bulletin.getPeriode().isBlank()) {
+            throw new IllegalArgumentException("La période est requise");
+        }
+
+        if (bulletin.getMoyenne() != null && (bulletin.getMoyenne() < 0 || bulletin.getMoyenne() > 20)) {
+            throw new IllegalArgumentException("La moyenne doit être entre 0 et 20");
+        }
+
+        if (bulletin.getMoyennDelaClasse() != null &&
+                (bulletin.getMoyennDelaClasse() < 0 || bulletin.getMoyennDelaClasse() > 20)) {
+            throw new IllegalArgumentException("La moyenne de la classe doit être entre 0 et 20");
+        }
+    }
 }

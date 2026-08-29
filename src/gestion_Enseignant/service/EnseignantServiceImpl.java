@@ -1,5 +1,7 @@
 package gestion_Enseignant.service;
 
+import Event.EnseignantCreatedEvent;
+import Event.EventDispatcher;
 import MVC.PasswordUtil;
 import gestion_Enseignant.dao.EnseignantDao;
 import gestion_Enseignant.model.Enseignant;
@@ -15,29 +17,48 @@ import java.util.Optional;
 public class EnseignantServiceImpl  implements EnseignantService{
     private final DataSource ds;
     private final EnseignantDao enseignantDao;
+    private final EventDispatcher eventDispatcher;
+    private Integer currentUserId;
+    private String currentUserName;
 
     public EnseignantServiceImpl(DataSource ds, EnseignantDao enseignantDao){
         this.ds = ds;
         this.enseignantDao = enseignantDao;
+        this.eventDispatcher = EventDispatcher.getInstance();
+    }
+    public void setCurrentUser(Integer userId, String userName) {
+        this.currentUserId = userId;
+        this.currentUserName = userName;
     }
 
     @Override
     public Enseignant creerEnseignant(Enseignant enseignant, String password){
         validerEnseignant(enseignant);
-        if(password == null || password.length() < 6){
-            throw  new IllegalArgumentException("Le mot de passe doit contenir 6 carractères");
+
+        if (password == null || password.length() < 6) {
+            throw new IllegalArgumentException("Le mot de passe doit contenir au moins 6 caractères");
         }
 
-        if(enseignantDao.loginExists(enseignant.getLogin())){
-            throw new IllegalArgumentException("Ce login existe déja");
+        if (enseignantDao.loginExists(enseignant.getLogin())) {
+            throw new IllegalArgumentException("Ce login existe déjà");
         }
-        if (emailExists(enseignant.getEmail())) {
-            throw new IllegalArgumentException("Cet email est déjà utilisé");
-        }
+
         enseignant.setPasswordHash(PasswordUtil.hashPassword(password));
         enseignant.setActif(true);
 
-        return enseignantDao.save(enseignant);
+        Enseignant created = enseignantDao.save(enseignant);
+
+        //  Déclencher l'événement ENSEIGNANT_CREATED
+        if (currentUserId != null && currentUserName != null) {
+            EnseignantCreatedEvent event = new EnseignantCreatedEvent(
+                    currentUserId,
+                    currentUserName,
+                    created
+            );
+            eventDispatcher.dispatch(event);
+        }
+
+        return created;
     }
 
     @Override

@@ -1,0 +1,10 @@
+[2025-11-09 17:17:08] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=52e2c125-7cf9-44e5-9178-977e1d7d2561
+[2025-11-09 17:21:58] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=766a84e2-ef9f-4f3e-adf8-9d5244eb664c
+[2025-11-09 17:24:29] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=6952278b-9109-4547-9d61-652b972f9da9
+[2025-11-09 17:26:26] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=1630552c-0987-42dd-b3ae-910f0024879a
+[2025-11-10 09:22:01] [USER_LOGIN] User=jhonson jhonson (5) | Connexion réussie - Rôle: Enseignant | EventID=38633380-0d4c-4cda-973f-b04287516afd
+[2025-11-10 10:46:50] [USER_LOGOUT] User=jhonson jhonson (5) | Déconnexion | EventID=b3def6d1-8d84-4402-b3de-00d6f0b45cd1
+[2025-11-10 11:23:13] [USER_LOGIN] User=jhonson jhonson (5) | Connexion réussie - Rôle: Enseignant | EventID=0156d9e7-fb8a-4f97-b49a-4caa481dd8ed
+[2025-11-10 11:23:26] [USER_LOGOUT] User=jhonson jhonson (5) | Déconnexion | EventID=0bc32fe4-41bc-441b-b297-f3aa737729b4
+[2025-11-10 11:23:32] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=3e4bf3e6-b414-4199-b6a3-f6d8a8fcb160
+[2025-11-10 11:23:41] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=8afa578c-96ce-47b4-b507-c7984dac52b3

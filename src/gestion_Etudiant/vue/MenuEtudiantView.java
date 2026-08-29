@@ -2,6 +2,7 @@ package gestion_Etudiant.vue;
 
 import Auhentifcation.AuthenticationService;
 import Auhentifcation.ProfilView;
+import MVC.NotificationView;
 import gestion_Bulletin.model.Bulletin;
 import gestion_Bulletin.service.BulletinService;
 import gestion_Etudiant.model.Etudiant;
@@ -19,6 +20,7 @@ public class MenuEtudiantView {
     private final BulletinService bulletinService;
     private final ProfilView profilView;
     private final Scanner scanner;
+    private final NotificationView notificationView;
     private final DecimalFormat df = new DecimalFormat("#0.00");
     private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
@@ -27,11 +29,13 @@ public class MenuEtudiantView {
             NoteService noteService,
             BulletinService bulletinService,
             ProfilView profilView,
+            NotificationView notificationView,
             Scanner scanner) {
         this.authService = authService;
         this.noteService = noteService;
         this.bulletinService = bulletinService;
         this.profilView = profilView;
+        this.notificationView = notificationView;
         this.scanner = scanner;
     }
     public void afficher() {
@@ -52,6 +56,8 @@ public class MenuEtudiantView {
     }
 
     private void afficherMenu(Etudiant etudiant){
+        String notificationBadge = notificationView.getBadge(etudiant.getId());
+
         System.out.println("\n╔════════════════════════════════════════════════════════════════╗");
         System.out.println("║                    ESPACE ÉTUDIANT                             ║");
         System.out.println("╠════════════════════════════════════════════════════════════════╣");
@@ -65,7 +71,8 @@ public class MenuEtudiantView {
         System.out.println("║  1.    Voir mes notes                                          ║");
         System.out.println("║  2.    Voir mes bulletins                                      ║");
         System.out.println("║  3.    Mes statistiques                                        ║");
-        System.out.println("║  4.    Mon Profil                                              ║");
+        System.out.println("║  4.    Notifications%-44s║%n\", notificationBadge);                                              ║");
+        System.out.println("║  5.    Mon Profil                                              ║");
         System.out.println("║  0.    Déconnexion                                             ║");
         System.out.println("╚════════════════════════════════════════════════════════════════╝");
         System.out.print("Votre choix > ");
@@ -83,6 +90,9 @@ public class MenuEtudiantView {
                 voirMesStatistiques(etudiant);
                 break;
             case "4":
+                notificationView.afficherNotifications(etudiant.getId());
+                break;
+            case "5":
                 profilView.menu();
                 break;
             case "0":
@@ -92,7 +102,7 @@ public class MenuEtudiantView {
                 }
                 break;
             default:
-                System.out.println("Choix invalide.");
+                System.out.println("❌ Choix invalide.");
                 attendreEntree();
         }
         return true;

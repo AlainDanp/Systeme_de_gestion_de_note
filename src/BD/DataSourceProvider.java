@@ -1,4 +1,4 @@
-package gestion_Bulletin.dao;
+package BD;
 
 import javax.sql.DataSource;
 import java.sql.Connection;

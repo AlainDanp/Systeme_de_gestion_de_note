@@ -2,6 +2,7 @@ package gestion_Enseignant.vue;
 
 import Auhentifcation.AuthenticationService;
 import Auhentifcation.ProfilView;
+import MVC.NotificationView;
 import gestion_Bulletin.vue.BulletinView;
 import gestion_Enseignant.model.Enseignant;
 import gestion_Matiere.vue.MatiereView;
@@ -17,19 +18,22 @@ public class MenuEnseignantView {
     private final BulletinView bulletinView;
     private final MatiereView matiereView;
     private final ProfilView profilView;
+    private final NotificationView notificationView;
 
     public MenuEnseignantView( AuthenticationService authService,
                                Scanner scanner,
                                NoteView noteView,
                                BulletinView bulletinView,
                                MatiereView matiereView,
-                               ProfilView profilView){
+                               ProfilView profilView,
+                               NotificationView notificationView) {
         this.bulletinView = bulletinView;
         this.scanner = scanner;
         this.noteView = noteView;
         this.profilView = profilView;
         this.matiereView = matiereView;
         this.authService = authService;
+        this.notificationView = notificationView;
     }
 
     public void afficher(){

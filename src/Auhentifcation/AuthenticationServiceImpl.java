@@ -2,6 +2,9 @@ package Auhentifcation;
 
 import Admin.dao.AdminDao;
 import Admin.model.Admin;
+import Event.EventDispatcher;
+import Event.UserLoginEvent;
+import Event.UserLogoutEvent;
 import MVC.PasswordUtil;
 import MVC.Role;
 import MVC.User;
@@ -17,6 +20,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AdminDao adminDao;
     private final EnseignantDao enseignantDao;
     private final EtudiantDao etudiantDao;
+    private final EventDispatcher eventDispatcher;
 
     private User currentUser = null;
 
@@ -24,6 +28,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         this.enseignantDao = enseignantDao;
         this.etudiantDao = etudiantDao;
         this.adminDao = adminDao;
+        this.eventDispatcher = EventDispatcher.getInstance();
     }
 
     @Override
@@ -46,7 +51,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             if (PasswordUtil.verifyPassword(password, a.getPasswordHash())) {
                 adminDao.updateDerniereConnexion(a.getIdAdmin());
                 currentUser = a;
-                System.out.println("✅ Connexion réussie : " + a.getNomComplet() + " (Administrateur)");
+
+                // 🔥 Déclencher l'événement USER_LOGIN
+                UserLoginEvent event = new UserLoginEvent(a.getId(), a.getNomComplet(), a.getRole());
+                eventDispatcher.dispatch(event);
+
+                System.out.println(" Connexion réussie : " + a.getNomComplet() + " (Administrateur)");
                 return Optional.of(a);
             }
         }
@@ -67,6 +77,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
                 // Stocker dans la session
                 currentUser = e;
+
+                UserLoginEvent event = new UserLoginEvent(e.getId(), e.getNomComplet(), e.getRole());
+                eventDispatcher.dispatch(event);
 
                 System.out.println(" Connexion réussie : " + e.getNomComplet() + " (Enseignant)");
                 return Optional.of(e);
@@ -91,6 +104,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 // Stocker dans la session
                 currentUser = e;
 
+                // 🔥 Déclencher l'événement USER_LOGIN
+                UserLoginEvent event = new UserLoginEvent(e.getId(), e.getNomComplet(), e.getRole());
+                eventDispatcher.dispatch(event);
+
                 System.out.println(" Connexion réussie : " + e.getNomComplet() + " (Étudiant)");
                 return Optional.of(e);
             }
@@ -103,6 +120,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public void logout() {
         if (currentUser != null) {
+
+            UserLogoutEvent event = new UserLogoutEvent(currentUser.getId(), currentUser.getNomComplet());
+            eventDispatcher.dispatch(event);
+
             System.out.println(" Déconnexion de : " + currentUser.getNomComplet());
             currentUser = null;
         }

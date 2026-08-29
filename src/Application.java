@@ -4,10 +4,13 @@ import Auhentifcation.AuthenticationService;
 import Auhentifcation.AuthenticationServiceImpl;
 import Auhentifcation.LoginView;
 import Auhentifcation.ProfilView;
+import Event.EventDispatcher;
+import Event.listener.*;
+import MVC.NotificationView;
 import MVC.Role;
 import MVC.User;
 import gestion_Bulletin.dao.BulletinDao;
-import gestion_Bulletin.dao.DataSourceProvider;
+import BD.DataSourceProvider;
 import gestion_Bulletin.service.BulletinService;
 import gestion_Bulletin.service.BulletinServiceImpl;
 import gestion_Bulletin.vue.BulletinView;
@@ -47,6 +50,7 @@ public class Application {
     private DataSource dataSource;
     private Scanner scanner;
 
+    // DAO
     private AdminDao adminDao;
     private BulletinDao bulletinDao;
     private NoteDao noteDao;
@@ -55,31 +59,40 @@ public class Application {
     private EtudiantDao etudiantDao;
     private ClasseDao classeDao;
 
-
-
+    // Services
     private BulletinService bulletinService;
     private NoteService noteService;
     private MatiereService matiereService;
     private EnseignantService enseignantService;
-    private ClasseService classeService;
     private EtudiantService etudiantService;
+    private ClasseService classeService;
     private AuthenticationService authenticationService;
 
+    // Système d'événements
+    private EventDispatcher eventDispatcher;
+    private ConsoleLoggerListener consoleLogger;
+    private NotificationListener notificationListener;
+    private FileLoggerListener fileLogger;
+    private StatisticsListener statisticsListener;
+    private EmailNotificationListener emailListener;
 
-    private BulletinView bulletinView;
-    private NoteView noteView;
-    private MatiereView matiereView;
-    private ClasseView classeView;
-    private EnseignantView enseignantView;
-    private EtudiantView etudiantView;
-
-
+    // Vues communes
     private LoginView loginView;
     private ProfilView profilView;
+    private NotificationView notificationView;
 
+    // Vues partagées
+    private NoteView noteView;
+    private BulletinView bulletinView;
+    private MatiereView matiereView;
+    private EnseignantView enseignantView;
+    private EtudiantView etudiantView;
+    private ClasseView classeView;
+
+    // Menus principaux
+    private MenuAdminView menuAdminView;
     private MenuEnseignantView menuEnseignantView;
     private MenuEtudiantView menuEtudiantView;
-    private MenuAdminView menuAdminView;
 
 
     private void initialiser() {
@@ -102,6 +115,8 @@ public class Application {
 
         scanner = new Scanner(System.in);
 
+        initialiserSystemeEvenements();
+
         adminDao = new AdminDao(dataSource);
         bulletinDao = new BulletinDao(dataSource);
         noteDao = new NoteDao(dataSource);
@@ -111,9 +126,6 @@ public class Application {
         classeDao = new ClasseDao(dataSource);
 
        // System.out.println(" DAO initialisés");
-
-
-
 
         noteService = new NoteServiceImpl(dataSource, noteDao);
         bulletinService = new BulletinServiceImpl(dataSource, bulletinDao);
@@ -126,9 +138,9 @@ public class Application {
 
         loginView = new LoginView(authenticationService, scanner);
         profilView = new ProfilView(authenticationService, scanner);
+        notificationView = new NotificationView(notificationListener, scanner);
 
-
-        // Initialisation des Vues
+        // Initialisation des vues
         bulletinView = new BulletinView(bulletinService, scanner);
         noteView = new NoteView(noteService, scanner);
         classeView = new ClasseView(classeService, scanner);
@@ -138,16 +150,18 @@ public class Application {
 
         menuEnseignantView = new MenuEnseignantView(
                 authenticationService, scanner,
-                noteView, bulletinView, matiereView, profilView
+                noteView, bulletinView, matiereView,
+                profilView, notificationView
         );
         menuEtudiantView = new MenuEtudiantView(
                 authenticationService, noteService, bulletinService,
-                profilView, scanner
+                profilView, notificationView, scanner // 🔥 Passée correctement
         );
         menuAdminView = new MenuAdminView(
                 authenticationService, scanner,
                 enseignantView, etudiantView, classeView,
-                matiereView, noteView, bulletinView, profilView
+                matiereView, noteView, bulletinView,
+                profilView, notificationView
         );
 
         //System.out.println(" Vues initialisées");
@@ -155,6 +169,23 @@ public class Application {
         System.out.println("Application prête !\n");
 
 
+    }
+
+    private void initialiserSystemeEvenements() {
+        eventDispatcher = EventDispatcher.getInstance();
+
+        consoleLogger = new ConsoleLoggerListener();
+        notificationListener = new NotificationListener();
+        fileLogger = new FileLoggerListener("logs/application.log");
+        statisticsListener = new StatisticsListener();
+        emailListener = new EmailNotificationListener();
+
+        // Enregistrer les listeners
+//        eventDispatcher.registerListener(consoleLogger);
+//        eventDispatcher.registerListener(notificationListener);
+//        eventDispatcher.registerListener(fileLogger);
+//        eventDispatcher.registerListener(statisticsListener);
+//        eventDispatcher.registerListener(emailListener);
     }
 
 
@@ -175,6 +206,7 @@ public class Application {
     public void demarrer() {
         initialiser();
         afficherBanniere();
+
        while (true){
            Optional<User> user =loginView.afficherLogin();
 
@@ -183,6 +215,8 @@ public class Application {
                break;
            }
            User authenticatedUser = user.get();
+           configurerUtilisateurCourant(authenticatedUser);
+
            if (authenticatedUser.getRole() == Role.ADMIN) {
                menuAdminView.afficher();
            } else if (authenticatedUser.getRole() == Role.ENSEIGNANT) {
@@ -192,6 +226,7 @@ public class Application {
            } else {
                System.out.println(" Rôle non reconnu");
            }
+           afficherStatistiquesSession();
        }
        arreter();
     }
@@ -363,5 +398,35 @@ public class Application {
         }
 
         System.out.println(" Application arrêtée proprement");
+    }
+    private void configurerUtilisateurCourant(User user) {
+        if (noteService instanceof NoteServiceImpl) {
+            ((NoteServiceImpl) noteService).setCurrentUser(user.getId(), user.getNomComplet());
+        }
+        if (bulletinService instanceof BulletinServiceImpl) {
+            ((BulletinServiceImpl) bulletinService).setCurrentUser(user.getId(), user.getNomComplet());
+        }
+        if (enseignantService instanceof EnseignantServiceImpl) {
+            ((EnseignantServiceImpl) enseignantService).setCurrentUser(user.getId(), user.getNomComplet());
+        }
+        if (etudiantService instanceof EtudiantServiceImpl) {
+            ((EtudiantServiceImpl) etudiantService).setCurrentUser(user.getId(), user.getNomComplet());
+        }
+    }
+    private void afficherStatistiquesSession() {
+        System.out.println("\n╔════════════════════════════════════════════════════════════════╗");
+        System.out.println("║              STATISTIQUES DE LA SESSION                        ║");
+        System.out.println("╠════════════════════════════════════════════════════════════════╣");
+
+        var stats = statisticsListener.getAllEventCounts();
+        if (stats.isEmpty()) {
+            System.out.println("║  Aucune activité enregistrée                                   ║");
+        } else {
+            stats.forEach((type, count) -> {
+                System.out.printf("║  %-40s : %5d          ║%n", type, count);
+            });
+        }
+
+        System.out.println("╚════════════════════════════════════════════════════════════════╝");
     }
 }

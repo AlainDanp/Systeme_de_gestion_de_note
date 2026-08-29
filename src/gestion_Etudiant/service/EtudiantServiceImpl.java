@@ -1,9 +1,10 @@
 package gestion_Etudiant.service;
 
+import Event.EtudiantCreatedEvent;
+import Event.EventDispatcher;
 import MVC.PasswordUtil;
 import gestion_Etudiant.dao.EtudiantDao;
 import gestion_Etudiant.model.Etudiant;
-
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,10 +16,19 @@ import java.util.Optional;
 public class EtudiantServiceImpl implements EtudiantService {
     private final DataSource ds;
     private final EtudiantDao etudiantDao;
+    private final EventDispatcher eventDispatcher;
+    private Integer currentUserId;
+    private String currentUserName;
 
     public EtudiantServiceImpl(DataSource ds, EtudiantDao etudiantDao){
         this.ds = ds;
         this.etudiantDao = etudiantDao;
+        this.eventDispatcher = EventDispatcher.getInstance();
+    }
+
+    public void setCurrentUser(Integer userId, String userName) {
+        this.currentUserId = userId;
+        this.currentUserName = userName;
     }
 
     @Override
@@ -33,22 +43,22 @@ public class EtudiantServiceImpl implements EtudiantService {
             throw new IllegalArgumentException("Ce login existe déjà");
         }
 
-        if (etudiant.getEmail() != null && !etudiant.getEmail().isBlank()) {
-            if (emailExists(etudiant.getEmail())) {
-                throw new IllegalArgumentException("Cet email est déjà utilisé");
-            }
-        }
-
-        if (etudiant.getClasseId() != null) {
-            if (!classeExists(etudiant.getClasseId())) {
-                throw new IllegalArgumentException("Classe introuvable");
-            }
-        }
-
         etudiant.setPasswordHash(PasswordUtil.hashPassword(password));
         etudiant.setActif(true);
 
-        return etudiantDao.save(etudiant);
+        Etudiant created = etudiantDao.save(etudiant);
+
+        //  Déclencher l'événement ETUDIANT_CREATED
+        if (currentUserId != null && currentUserName != null) {
+            EtudiantCreatedEvent event = new EtudiantCreatedEvent(
+                    currentUserId,
+                    currentUserName,
+                    created
+            );
+            eventDispatcher.dispatch(event);
+        }
+
+        return created;
     }
 
     @Override
@@ -113,7 +123,7 @@ public class EtudiantServiceImpl implements EtudiantService {
     @Override
     public List<Etudiant> listerEtudiantsParClasse(Integer classeId) {
         if (classeId == null) {
-            throw new IllegalArgumentException("L'ID de la classe est requis");
+            throw new IllegalArgumentException(" L'ID de la classe est requis");
         }
         return etudiantDao.findByClasse(classeId);
     }

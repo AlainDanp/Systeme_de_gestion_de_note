@@ -1,5 +1,9 @@
 package gestion_Note.service;
 
+import Event.EventDispatcher;
+import Event.EventListener;
+import Event.NoteCreatedEvent;
+import Event.NoteUpdatedEvent;
 import gestion_Note.model.Note;
 import gestion_Note.dao.NoteDao;
 
@@ -15,36 +19,93 @@ import java.util.Optional;
 public class NoteServiceImpl implements NoteService{
     private final DataSource ds;
     private final NoteDao noteDao;
+    private final EventDispatcher eventDispatcher;
+    private Integer currentUserId;
+    private String currentUserName;
 
     public NoteServiceImpl(DataSource ds, NoteDao noteDao) {
         this.ds = ds;
         this.noteDao = noteDao;
-    }
+        this.eventDispatcher = EventDispatcher.getInstance();
+        }
 
+    public void setCurrentUser(Integer userId, String userName) {
+        this.currentUserId = userId;
+        this.currentUserName = userName;
+    }
 
     @Override
     public Note creeNote(Note note) {
         validerNote(note);
 
-        if (!etudiantExiste(note.getEtudiantId())) {
-            throw new IllegalArgumentException("L'étudiant avec l'ID " + note.getEtudiantId() + " n'existe pas");
-        }
+        try (Connection c = ds.getConnection()) {
+            c.setAutoCommit(false);
 
-        if (!matiereExiste(note.getMatiere())) {
-            throw new IllegalArgumentException("La matière '" + note.getMatiere() + "' n'existe pas");
-        }
+            try {
+                Note created = noteDao.save(note);
+                c.commit();
 
-        return noteDao.save(note);
+                //  Déclencher l'événement NOTE_CREATED
+                if (currentUserId != null && currentUserName != null) {
+                    NoteCreatedEvent event = new NoteCreatedEvent(
+                            currentUserId,
+                            currentUserName,
+                            created,
+                            created.getEtudiantNomComplet(),
+                            created.getMatiere()
+                    );
+                    eventDispatcher.dispatch(event);
+                }
+
+                return created;
+
+            } catch (Exception e) {
+                c.rollback();
+                throw e;
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException("Erreur lors de la création de la note", ex);
+        }
     }
 
 
     @Override
     public void modifierNote(Note note) {
-        if(note.getId() == null){
-            throw new IllegalArgumentException("L'ID de la note est requis pour la modification");
+        if (note  == null) {
+            throw new IllegalArgumentException("L'ID de la note est requis");
         }
         validerNote(note);
-        noteDao.update(note);
+        // Récupérer l'ancienne valeur
+        Optional<Note> oldNoteOpt = noteDao.findById(note.getIdNote());
+        double ancienneValeur = oldNoteOpt.map(Note::getValeur).orElse(0.0);
+
+        try (Connection c = ds.getConnection()) {
+            c.setAutoCommit(false);
+
+            try {
+                noteDao.update(note);
+                c.commit();
+
+                //  Déclencher l'événement NOTE_UPDATED
+                if (currentUserId != null && currentUserName != null) {
+                    NoteUpdatedEvent event = new NoteUpdatedEvent(
+                            currentUserId,
+                            currentUserName,
+                            note,
+                            ancienneValeur,
+                            note.getEtudiantNomComplet(),
+                            note.getMatiere()
+                    );
+                    eventDispatcher.dispatch(event);
+                }
+
+            } catch (Exception e) {
+                c.rollback();
+                throw e;
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException("Erreur lors de la modification de la note", ex);
+        }
     }
 
     @Override

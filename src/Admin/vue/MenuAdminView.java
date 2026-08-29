@@ -2,6 +2,7 @@ package Admin.vue;
 
 import Auhentifcation.AuthenticationService;
 import Auhentifcation.ProfilView;
+import MVC.NotificationView;
 import gestion_Bulletin.vue.BulletinView;
 import gestion_Classe.vue.ClasseView;
 import gestion_Enseignant.vue.EnseignantView;
@@ -22,6 +23,7 @@ public class MenuAdminView {
     private final NoteView noteView;
     private final BulletinView bulletinView;
     private final ProfilView profilView;
+    private final NotificationView notificationView;
 
     public MenuAdminView(
             AuthenticationService authService,
@@ -32,7 +34,8 @@ public class MenuAdminView {
             MatiereView matiereView,
             NoteView noteView,
             BulletinView bulletinView,
-            ProfilView profilView) {
+            ProfilView profilView,
+            NotificationView notificationView) {
         this.authService = authService;
         this.scanner = scanner;
         this.enseignantView = enseignantView;
@@ -42,6 +45,7 @@ public class MenuAdminView {
         this.noteView = noteView;
         this.bulletinView = bulletinView;
         this.profilView = profilView;
+        this.notificationView = notificationView;
     }
 
     public void afficher() {
@@ -55,39 +59,42 @@ public class MenuAdminView {
             afficherMenu(admin);
             String choix = scanner.nextLine().trim();
 
-            if (!traiterChoix(choix)) {
+            if (!traiterChoix(choix, admin)) {
                 break;
             }
         }
     }
 
     private void afficherMenu(Admin admin) {
+        String notificationBadge = notificationView.getBadge(admin.getId());
+
         System.out.println("\n╔════════════════════════════════════════════════════════════════╗");
         System.out.println("║                  ESPACE ADMINISTRATEUR                         ║");
         System.out.println("╠════════════════════════════════════════════════════════════════╣");
-        System.out.printf(" ║    Connecté : %-48s║%n", admin.getNomComplet());
+        System.out.printf("║  👤 Connecté : %-48s║%n", admin.getNomComplet());
         System.out.println("╠════════════════════════════════════════════════════════════════╣");
         System.out.println("║                      GESTION                                   ║");
         System.out.println("╠════════════════════════════════════════════════════════════════╣");
-        System.out.println("║  1.   Gestion des Enseignants                                  ║");
-        System.out.println("║  2.   Gestion des Étudiants                                    ║");
-        System.out.println("║  3.   Gestion des Classes                                      ║");
-        System.out.println("║  4.   Gestion des Matières                                     ║");
+        System.out.println("║  1. 👨‍🏫 Gestion des Enseignants                                ║");
+        System.out.println("║  2. 👨‍🎓 Gestion des Étudiants                                   ║");
+        System.out.println("║  3. 🏫 Gestion des Classes                                     ║");
+        System.out.println("║  4. 📚 Gestion des Matières                                    ║");
         System.out.println("╠════════════════════════════════════════════════════════════════╣");
         System.out.println("║                      SCOLAIRE                                  ║");
         System.out.println("╠════════════════════════════════════════════════════════════════╣");
-        System.out.println("║  5.   Gestion des Notes                                        ║");
-        System.out.println("║  6.   Gestion des Bulletins                                    ║");
+        System.out.println("║  5. 📝 Gestion des Notes                                       ║");
+        System.out.println("║  6. 📊 Gestion des Bulletins                                   ║");
         System.out.println("╠════════════════════════════════════════════════════════════════╣");
         System.out.println("║                      COMPTE                                    ║");
         System.out.println("╠════════════════════════════════════════════════════════════════╣");
-        System.out.println("║  7.   Mon Profil                                               ║");
-        System.out.println("║  0.   Déconnexion                                              ║");
+        System.out.printf("║  7. 📬 Notifications%-44s║%n", notificationBadge);
+        System.out.println("║  8. 👤 Mon Profil                                              ║");
+        System.out.println("║  0. 🚪 Déconnexion                                             ║");
         System.out.println("╚════════════════════════════════════════════════════════════════╝");
         System.out.print("Votre choix > ");
     }
 
-    private boolean traiterChoix(String choix) {
+    private boolean traiterChoix(String choix, Admin admin) {
         switch (choix) {
             case "1":
                 enseignantView.menu();
@@ -114,6 +121,10 @@ public class MenuAdminView {
                 nettoyerEcran();
                 break;
             case "7":
+                notificationView.afficherNotifications(admin.getId());
+                nettoyerEcran();
+                break;
+            case "8":
                 profilView.menu();
                 nettoyerEcran();
                 break;
@@ -124,7 +135,7 @@ public class MenuAdminView {
                 }
                 break;
             default:
-                System.out.println(" Choix invalide.");
+                System.out.println("❌Choix invalide.");
                 attendreEntree();
         }
         return true;
@@ -154,9 +165,4 @@ public class MenuAdminView {
         System.out.print("\nAppuyez sur Entrée pour continuer...");
         scanner.nextLine();
     }
-
-
-
-
-
 }

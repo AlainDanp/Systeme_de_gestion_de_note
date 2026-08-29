@@ -101,5 +101,7 @@ public class Bulletin {
     }
 
 
-
+    public Integer getIdEtudiant() {
+        return etudiantId;
+    }
 }
