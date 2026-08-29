@@ -3,6 +3,9 @@ package gestion_Classe.vue;
 import gestion_Classe.model.Classe;
 import gestion_Classe.service.ClasseService;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
@@ -11,10 +14,12 @@ import java.util.Scanner;
 public class ClasseView {
     private final ClasseService service;
     private final Scanner scanner;
+    private final DataSource ds;
 
-    public ClasseView(ClasseService service, Scanner scanner) {
+    public ClasseView(ClasseService service, Scanner scanner, DataSource ds) {
         this.service = service;
         this.scanner = scanner;
+        this.ds = ds;
     }
 
     public void menu() {
@@ -147,6 +152,7 @@ public class ClasseView {
         System.out.print("\nID de la classe à supprimer : ");
         try {
             int id = Integer.parseInt(scanner.nextLine().trim());
+            Connection c = ds.getConnection();
 
             Optional<Classe> opt = service.getClasse(id);
             if (opt.isEmpty()) {
@@ -169,13 +175,13 @@ public class ClasseView {
             String confirmation = scanner.nextLine().trim().toLowerCase();
 
             if ("o".equals(confirmation) || "oui".equals(confirmation)) {
-                service.supprimerClasse(id);
+                service.supprimerClasse(c,id);
                 System.out.println("✅ Classe supprimée avec succès !");
             } else {
                 System.out.println("❌ Suppression annulée.");
             }
 
-        } catch (NumberFormatException ex) {
+        } catch (NumberFormatException | SQLException ex) {
             System.out.println("❌ ID invalide.");
         }
 

@@ -1,8 +1,10 @@
 package gestion_Classe.service;
 
+import MVC.SecurityContext;
 import gestion_Classe.dao.ClasseDao;
 import gestion_Classe.model.Classe;
 
+import java.sql.Connection;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,10 +16,12 @@ public class ClasseServiceImpl implements ClasseService {
 
     private final DataSource ds;
     private final ClasseDao classeDao;
+    private final SecurityContext securityContext;
 
-    public ClasseServiceImpl(DataSource ds, ClasseDao classeDao) {
+    public ClasseServiceImpl(DataSource ds, ClasseDao classeDao, SecurityContext securityContext) {
         this.ds = ds;
         this.classeDao = classeDao;
+        this.securityContext = securityContext;
     }
 
     @Override
@@ -46,7 +50,7 @@ public class ClasseServiceImpl implements ClasseService {
     }
 
     @Override
-    public void supprimerClasse(Integer id) {
+    public void supprimerClasse(Connection c,Integer id) {
         if (id == null) {
             throw new IllegalArgumentException("L'ID est requis");
         }
@@ -59,7 +63,7 @@ public class ClasseServiceImpl implements ClasseService {
             );
         }
 
-        classeDao.delete(id);
+        classeDao.delete(c,id);
 
     }
 

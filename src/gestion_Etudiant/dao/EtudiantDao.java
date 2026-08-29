@@ -16,12 +16,19 @@ public class EtudiantDao {
         this.ds = ds;
     }
 
-    public Etudiant save(Etudiant etudiant) {
+    public Etudiant save(Etudiant etudiant){
+        try(Connection c = ds.getConnection()){
+            return save(c, etudiant);
+        }catch (SQLException ex){
+            throw new RuntimeException("Erreur lors de l'insertion de l'étudiant", ex);
+        }
+    }
+
+    public Etudiant save(Connection c,Etudiant etudiant) {
         String sql = "INSERT INTO etudiant (nom, prenom, email, login, password_hash, classe_id, actif) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id";
 
-        try (Connection c = ds.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+        try (PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, etudiant.getNom());
             ps.setString(2, etudiant.getPrenom());
             ps.setString(3, etudiant.getEmail());
@@ -35,13 +42,14 @@ public class EtudiantDao {
             }
 
             ps.setBoolean(7, etudiant.isActif());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    etudiant.setIdEtudiant(rs.getInt("id"));
+                }
 
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                etudiant.setIdEtudiant(rs.getInt("id"));
             }
 
-            return findById(etudiant.getIdEtudiant()).orElse(etudiant);
+            return etudiant;
 
         } catch (SQLException ex) {
             throw new RuntimeException("Erreur lors de la création de l'étudiant", ex);
@@ -145,10 +153,10 @@ public class EtudiantDao {
         }
     }
 
-    public void delete(int id) {
+    public void delete(Connection c,int id) {
         String sql = "DELETE FROM etudiant WHERE id = ?";
 
-        try (Connection c = ds.getConnection();
+        try (
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, id);
             ps.executeUpdate();

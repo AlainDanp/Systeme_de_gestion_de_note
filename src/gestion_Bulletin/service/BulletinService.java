@@ -3,6 +3,7 @@ package gestion_Bulletin.service;
 import gestion_Bulletin.model.Bulletin;
 import gestion_Bulletin.model.NoteDetail;
 
+import java.sql.Connection;
 import java.util.List;
 import java.util.Optional;
 
@@ -12,7 +13,8 @@ public interface BulletinService {
     Optional<Bulletin> getBulletin(Integer id);
     Optional<Bulletin> getParEtudiantEtPeriode(Integer etudiantId, String periode);
     List<Bulletin> listerParEtudiant(Integer etudiantId);
-    void delete(Integer id);
+    List<Bulletin> listerTousLesBulletins();
+    void delete(Connection c, Integer id);
     void update(Bulletin bulletin);
     Bulletin creeBulletin(Bulletin bulletin);
     List<NoteDetail> getNotesAvecEnseignants(Integer etudiantId, String periode);

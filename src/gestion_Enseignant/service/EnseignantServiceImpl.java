@@ -3,6 +3,7 @@ package gestion_Enseignant.service;
 import Event.EnseignantCreatedEvent;
 import Event.EventDispatcher;
 import MVC.PasswordUtil;
+import MVC.SecurityContext;
 import gestion_Enseignant.dao.EnseignantDao;
 import gestion_Enseignant.model.Enseignant;
 
@@ -20,10 +21,12 @@ public class EnseignantServiceImpl  implements EnseignantService{
     private final EventDispatcher eventDispatcher;
     private Integer currentUserId;
     private String currentUserName;
+    private final SecurityContext securityContext;
 
-    public EnseignantServiceImpl(DataSource ds, EnseignantDao enseignantDao){
+    public EnseignantServiceImpl(DataSource ds, EnseignantDao enseignantDao, SecurityContext securityContext){
         this.ds = ds;
         this.enseignantDao = enseignantDao;
+        this.securityContext = securityContext;
         this.eventDispatcher = EventDispatcher.getInstance();
     }
     public void setCurrentUser(Integer userId, String userName) {
@@ -82,7 +85,7 @@ public class EnseignantServiceImpl  implements EnseignantService{
     }
 
     @Override
-    public void supprimerEnseignant(Integer id) {
+    public void supprimerEnseignant(Connection c,Integer id) {
         if (id == null) {
             throw new IllegalArgumentException("L'ID est requis");
         }
@@ -94,7 +97,7 @@ public class EnseignantServiceImpl  implements EnseignantService{
             );
         }
 
-        enseignantDao.delete(id);
+        enseignantDao.delete(c,id);
     }
 
     @Override

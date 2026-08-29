@@ -24,13 +24,13 @@ public final class DataSourceProvider {
     }
 
     private static DataSource createDataSource() {
-        String url = System.getenv("JDBC_URL");
+        String url      = lireVariable("JDBC_URL");
         if (url == null) url = "jdbc:postgresql://localhost:5432/gestion_etudiants";
 
-        String user = System.getenv("JDBC_USER");
+        String user = lireVariable("JDBC_USER");
         if (user == null) user = "admin";
 
-        String password = System.getenv("JDBC_PASSWORD");
+        String password = lireVariable("JDBC_PASSWORD");
         if (password == null) password = "admin123";
 
         // Charger le driver PostgreSQL
@@ -80,6 +80,11 @@ public final class DataSourceProvider {
             @Override
             public java.util.logging.Logger getParentLogger() { throw new UnsupportedOperationException(); }
         };
+    }
+
+    private static String lireVariable(String nom) {
+        String valeur = System.getenv(nom);
+        return (valeur == null || valeur.isBlank()) ? null : valeur;
     }
 
     public static void close() {

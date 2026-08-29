@@ -3,6 +3,9 @@ package gestion_Note.vue;
 import gestion_Note.model.Note;
 import gestion_Note.service.NoteService;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -13,12 +16,14 @@ public class NoteView {
 
     private final NoteService service;
     private final Scanner scanner;
+    private final DataSource ds;
     private final DecimalFormat df = new DecimalFormat("#0.00");
     private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-    public NoteView(NoteService service, Scanner scanner) {
+    public NoteView(NoteService service, Scanner scanner, DataSource ds) {
         this.service = service;
         this.scanner = scanner;
+        this.ds = ds;
     }
 
     public void menu() {
@@ -154,6 +159,7 @@ public class NoteView {
         try {
             System.out.print("ID de la note à supprimer : ");
             int id = Integer.parseInt(scanner.nextLine().trim());
+            Connection c = ds.getConnection();
 
             Optional<Note> optNote = service.getNote(id);
             if (optNote.isEmpty()) {
@@ -167,7 +173,7 @@ public class NoteView {
             String confirmation = scanner.nextLine().trim().toLowerCase();
 
             if ("o".equals(confirmation) || "oui".equals(confirmation)) {
-                service.supprimerNote(id);
+                service.supprimerNote(c,id);
                 System.out.println(" Note supprimée avec succès !");
             } else {
                 System.out.println(" Suppression annulée.");
@@ -175,6 +181,8 @@ public class NoteView {
 
         } catch (NumberFormatException ex) {
             System.out.println(" ID invalide.");
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 

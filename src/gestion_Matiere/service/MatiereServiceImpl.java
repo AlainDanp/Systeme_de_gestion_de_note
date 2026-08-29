@@ -1,5 +1,6 @@
 package gestion_Matiere.service;
 
+import MVC.SecurityContext;
 import gestion_Matiere.dao.MatiereDao;
 import gestion_Matiere.model.Matiere;
 
@@ -16,10 +17,12 @@ public class MatiereServiceImpl implements MatiereService {
 
     private final DataSource ds;
     private final MatiereDao matiereDao;
+    private final SecurityContext securityContext;
 
-    public MatiereServiceImpl(DataSource ds, MatiereDao matiereDao) {
+    public MatiereServiceImpl(DataSource ds, MatiereDao matiereDao, SecurityContext securityContext) {
         this.ds = ds;
         this.matiereDao = matiereDao;
+        this.securityContext = securityContext;
     }
 
     @Override

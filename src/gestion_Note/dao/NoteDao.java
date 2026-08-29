@@ -1,11 +1,11 @@
 package gestion_Note.dao;
 
-
 import gestion_Note.model.Note;
 
 import javax.sql.DataSource;
 import java.sql.*;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -17,32 +17,38 @@ public class NoteDao {
     }
 
     public Note save(Note note) {
-        String sql = "INSERT INTO note (id_etudiant, periode, matiere, valeur) " +
+        try (Connection c = ds.getConnection()) {
+            return save(c, note);
+        } catch (SQLException ex) {
+            throw new RuntimeException("Erreur lors de l'insertion de la note", ex);
+        }
+    }
+
+
+    public Note save(Connection c, Note note) {
+        String sql = "INSERT INTO note (id_etudiant, periode, nom_matiere, valeur) " +
                 "VALUES (?, ?, ?, ?) RETURNING id, created_at";
-        try (Connection c = ds.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+        try (PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, note.getEtudiantId());
             ps.setString(2, note.getPeriode());
             ps.setString(3, note.getMatiere());
             ps.setDouble(4, note.getValeur());
 
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                note.setId(rs.getInt("id"));
-                Timestamp ts = rs.getTimestamp("created_at");
-                if (ts != null) {
-                    note.setCreatedAt(ts.toInstant().atOffset(OffsetDateTime.now().getOffset()));
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    note.setId(rs.getInt("id"));
+                    Timestamp ts = rs.getTimestamp("created_at");
+                    if (ts != null) note.setCreatedAt(ts.toLocalDateTime().atOffset(ZoneOffset.UTC));
                 }
             }
-            return findById(note.getId()).orElse(note);
-
+            return note;
         } catch (SQLException ex) {
             throw new RuntimeException("Erreur lors de l'insertion de la note", ex);
         }
     }
 
     public void update(Note note) {
-        String sql = "UPDATE note SET id_etudiant = ?, periode = ?, matiere = ?, valeur = ? WHERE id = ?";
+        String sql = "UPDATE note SET id_etudiant = ?, periode = ?, nom_matiere = ?, valeur = ? WHERE id = ?";
         try (Connection c = ds.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, note.getEtudiantId());
@@ -58,12 +64,12 @@ public class NoteDao {
 
     public Optional<Note> findById(int id) {
         String sql =
-                "SELECT n.id, n.id_etudiant, n.periode, n.matiere, n.valeur, n.created_at, " +
+                "SELECT n.id, n.id_etudiant, n.periode, n.nom_matiere, n.valeur, n.created_at, " +
                         "       e.nom as etudiant_nom, e.prenom as etudiant_prenom, " +
                         "       ens.nom as enseignant_nom, ens.prenom as enseignant_prenom " +
                         "FROM note n " +
                         "JOIN etudiant e ON n.id_etudiant = e.id " +
-                        "LEFT JOIN Matiere m ON n.matiere = m.nom " +
+                        "LEFT JOIN Matiere m ON n.nom_matiere = m.nom " +
                         "LEFT JOIN Enseignant ens ON m.id_enseignant = ens.id_enseignant " +
                         "WHERE n.id = ?";
 
@@ -80,9 +86,9 @@ public class NoteDao {
         }
     }
 
-    public void delete(int id) {
+    public void delete(Connection c,int id) {
         String sql = "DELETE FROM note WHERE id = ?";
-        try (Connection c = ds.getConnection();
+        try (
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, id);
             ps.executeUpdate();
@@ -93,30 +99,30 @@ public class NoteDao {
 
     public List<Note> findByEtudiant(int etudiantId) {
         String sql =
-                "SELECT n.id, n.id_etudiant, n.periode, n.matiere, n.valeur, n.created_at, " +
+                "SELECT n.id, n.id_etudiant, n.periode, n.nom_matiere, n.valeur, n.created_at, " +
                         "       e.nom as etudiant_nom, e.prenom as etudiant_prenom, " +
                         "       ens.nom as enseignant_nom, ens.prenom as enseignant_prenom " +
                         "FROM note n " +
                         "JOIN etudiant e ON n.id_etudiant = e.id " +
-                        "LEFT JOIN Matiere m ON n.matiere = m.nom " +
+                        "LEFT JOIN Matiere m ON n.nom_matiere = m.nom " +
                         "LEFT JOIN Enseignant ens ON m.id_enseignant = ens.id_enseignant " +
                         "WHERE n.id_etudiant = ? " +
-                        "ORDER BY n.periode DESC, n.matiere";
+                        "ORDER BY n.periode DESC, n.nom_matiere";
 
         return executeQuery(sql, etudiantId);
     }
 
     public List<Note> findByEtudiantAndPeriode(int etudiantId, String periode) {
         String sql =
-                "SELECT n.id, n.id_etudiant, n.periode, n.matiere, n.valeur, n.created_at, " +
+                "SELECT n.id, n.id_etudiant, n.periode, n.nom_matiere, n.valeur, n.created_at, " +
                         "       e.nom as etudiant_nom, e.prenom as etudiant_prenom, " +
                         "       ens.nom as enseignant_nom, ens.prenom as enseignant_prenom " +
                         "FROM note n " +
                         "JOIN etudiant e ON n.id_etudiant = e.id " +
-                        "LEFT JOIN Matiere m ON n.matiere = m.nom " +
+                        "LEFT JOIN Matiere m ON n.nom_matiere = m.nom " +
                         "LEFT JOIN Enseignant ens ON m.id_enseignant = ens.id_enseignant " +
                         "WHERE n.id_etudiant = ? AND n.periode = ? " +
-                        "ORDER BY n.matiere";
+                        "ORDER BY n.nom_matiere";
 
         List<Note> list = new ArrayList<>();
         try (Connection c = ds.getConnection();
@@ -136,15 +142,15 @@ public class NoteDao {
 
     public List<Note> findByPeriode(String periode) {
         String sql =
-                "SELECT n.id, n.id_etudiant, n.periode, n.matiere, n.valeur, n.created_at, " +
+                "SELECT n.id, n.id_etudiant, n.periode, n.nom_matiere, n.valeur, n.created_at, " +
                         "       e.nom as etudiant_nom, e.prenom as etudiant_prenom, " +
                         "       ens.nom as enseignant_nom, ens.prenom as enseignant_prenom " +
                         "FROM note n " +
                         "JOIN etudiant e ON n.id_etudiant = e.id " +
-                        "LEFT JOIN Matiere m ON n.matiere = m.nom " +
+                        "LEFT JOIN Matiere m ON n.nom_matiere = m.nom " +
                         "LEFT JOIN Enseignant ens ON m.id_enseignant = ens.id_enseignant " +
                         "WHERE n.periode = ? " +
-                        "ORDER BY e.nom, n.matiere";
+                        "ORDER BY e.nom, n.nom_matiere";
 
         List<Note> list = new ArrayList<>();
         try (Connection c = ds.getConnection();
@@ -163,14 +169,14 @@ public class NoteDao {
 
     public List<Note> findByMatiere(String matiere) {
         String sql =
-                "SELECT n.id, n.id_etudiant, n.periode, n.matiere, n.valeur, n.created_at, " +
+                "SELECT n.id, n.id_etudiant, n.periode, n.nom_matiere, n.valeur, n.created_at, " +
                         "       e.nom as etudiant_nom, e.prenom as etudiant_prenom, " +
                         "       ens.nom as enseignant_nom, ens.prenom as enseignant_prenom " +
                         "FROM note n " +
                         "JOIN etudiant e ON n.id_etudiant = e.id " +
-                        "LEFT JOIN Matiere m ON n.matiere = m.nom " +
+                        "LEFT JOIN Matiere m ON n.nom_matiere = m.nom " +
                         "LEFT JOIN Enseignant ens ON m.id_enseignant = ens.id_enseignant " +
-                        "WHERE n.matiere = ? " +
+                        "WHERE n.nom_matiere = ? " +
                         "ORDER BY n.periode DESC, e.nom";
 
         List<Note> list = new ArrayList<>();
@@ -190,12 +196,12 @@ public class NoteDao {
 
     public List<Note> findAll() {
         String sql =
-                "SELECT n.id, n.id_etudiant, n.periode, n.matiere, n.valeur, n.created_at, " +
+                "SELECT n.id, n.id_etudiant, n.periode, n.nom_matiere, n.valeur, n.created_at, " +
                         "       e.nom as etudiant_nom, e.prenom as etudiant_prenom, " +
                         "       ens.nom as enseignant_nom, ens.prenom as enseignant_prenom " +
                         "FROM note n " +
                         "JOIN etudiant e ON n.id_etudiant = e.id " +
-                        "LEFT JOIN Matiere m ON n.matiere = m.nom " +
+                        "LEFT JOIN Matiere m ON n.nom_matiere = m.nom " +
                         "LEFT JOIN Enseignant ens ON m.id_enseignant = ens.id_enseignant " +
                         "ORDER BY n.created_at DESC";
 
@@ -238,7 +244,7 @@ public class NoteDao {
         n.setId(rs.getInt("id"));
         n.setEtudiantId(rs.getInt("id_etudiant"));
         n.setPeriode(rs.getString("periode"));
-        n.setMatiere(rs.getString("matiere"));
+        n.setMatiere(rs.getString("nom_matiere"));
         n.setValeur(rs.getDouble("valeur"));
 
         Timestamp ts = rs.getTimestamp("created_at");

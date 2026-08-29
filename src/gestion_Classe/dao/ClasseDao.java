@@ -18,19 +18,29 @@ public class ClasseDao {
     }
 
     public Classe save(Classe classe){
+        try(Connection c = ds.getConnection()) {
+            return  save(c, classe);
+        }catch (SQLException ex){
+            throw new RuntimeException("Erreur lors de l'insertion de la classe", ex);
+        }
+    }
+
+    public Classe save(Connection c,Classe classe){
         String sql = "INSERT INTO Classe (niveau, nombre_eleves) VALUES (?, ?) RETURNING id_classe";
 
-        try (Connection c = ds.getConnection();
+        try (
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, classe.getNiveau());
             ps.setInt(2, classe.getNombreEleves() != null ? classe.getNombreEleves() : 0);
 
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                classe.setIdClasse(rs.getInt("id_classe"));
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    classe.setIdClasse(rs.getInt("id_classe"));
+                }
             }
 
-            return findById(classe.getIdClasse()).orElse(classe);
+            return classe;
 
         } catch (SQLException ex) {
             throw new RuntimeException("Erreur lors de la création de la classe", ex);
@@ -52,10 +62,10 @@ public class ClasseDao {
         }
     }
 
-    public void delete(int id) {
+    public void delete(Connection c,int id) {
         String sql = "DELETE FROM Classe WHERE id_classe = ?";
 
-        try (Connection c = ds.getConnection();
+        try (
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, id);
             ps.executeUpdate();

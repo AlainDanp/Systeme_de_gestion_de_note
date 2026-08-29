@@ -2,6 +2,7 @@ package gestion_Bulletin.service;
 
 import Event.BulletinGeneratedEvent;
 import Event.EventDispatcher;
+import MVC.SecurityContext;
 import gestion_Bulletin.dao.BulletinDao;
 import gestion_Bulletin.model.Bulletin;
 import gestion_Bulletin.model.NoteDetail;
@@ -18,13 +19,15 @@ public class BulletinServiceImpl implements BulletinService {
         private final BulletinDao bulletinDao;
         private final EventDispatcher eventDispatcher;
         private Integer currentUserId;
-         private String currentUserName;
+        private String currentUserName;
+        private SecurityContext securityContext;
 
 
-        public BulletinServiceImpl(DataSource ds, BulletinDao bulletinDao) {
+        public BulletinServiceImpl(DataSource ds, BulletinDao bulletinDao, SecurityContext securityContext) {
             this.ds = ds;
             this.bulletinDao = bulletinDao;
             this.eventDispatcher = EventDispatcher.getInstance();
+            this.securityContext = securityContext;
         }
 
     public void setCurrentUser(Integer userId, String userName) {
@@ -134,8 +137,8 @@ public class BulletinServiceImpl implements BulletinService {
 
 
         @Override
-        public void delete(Integer id) {
-            bulletinDao.delete(id);
+        public void delete(Connection c,Integer id) {
+            bulletinDao.delete(c,id);
         }
 
 
@@ -176,12 +179,12 @@ public class BulletinServiceImpl implements BulletinService {
     @Override
     public List<NoteDetail> getNotesAvecEnseignants(Integer etudiantId, String periode) {
         String sql =
-                "SELECT n.matiere, n.valeur, e.nom as ens_nom, e.prenom as ens_prenom " +
+                "SELECT n.nom_matiere, n.valeur, e.nom as ens_nom, e.prenom as ens_prenom " +
                         "FROM note n " +
-                        "LEFT JOIN Matiere m ON n.matiere = m.nom " +
+                        "LEFT JOIN Matiere m ON n.nom_matiere = m.nom " +
                         "LEFT JOIN Enseignant e ON m.id_enseignant = e.id_enseignant " +
                         "WHERE n.id_etudiant = ? AND n.periode = ? " +
-                        "ORDER BY n.matiere";
+                        "ORDER BY n.nom_matiere";
 
         List<NoteDetail> details = new ArrayList<>();
         try (Connection c = ds.getConnection();
@@ -191,7 +194,7 @@ public class BulletinServiceImpl implements BulletinService {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     NoteDetail nd = new NoteDetail();
-                    nd.setMatiere(rs.getString("matiere"));
+                    nd.setMatiere(rs.getString("nom_matiere"));
                     nd.setValeur(rs.getDouble("valeur"));
                     nd.setEnseignantNom(rs.getString("ens_nom"));
                     nd.setEnseignantPrenom(rs.getString("ens_prenom"));
@@ -211,6 +214,11 @@ public class BulletinServiceImpl implements BulletinService {
             throw new IllegalArgumentException("L'ID de l'étudiant est requis");
         }
             return bulletinDao.findByEtudiant(etudiantId);
+        }
+
+        @Override
+        public List<Bulletin> listerTousLesBulletins() {
+            return bulletinDao.findAll();
         }
 
 

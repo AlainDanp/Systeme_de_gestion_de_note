@@ -140,7 +140,7 @@ public class MatiereDao {
      * Compter le nombre de notes dans une matière
      */
     public int compterNotes(String nomMatiere) {
-        String sql = "SELECT COUNT(*) FROM note WHERE matiere = ?";
+        String sql = "SELECT COUNT(*) FROM note WHERE nom_matiere = ?";
         try (Connection c = ds.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, nomMatiere);

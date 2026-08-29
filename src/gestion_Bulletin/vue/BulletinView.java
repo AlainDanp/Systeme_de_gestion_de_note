@@ -4,6 +4,8 @@ import gestion_Bulletin.model.Bulletin;
 import gestion_Bulletin.model.NoteDetail;
 import gestion_Bulletin.service.BulletinService;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
 import java.text.DecimalFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -13,12 +15,14 @@ import java.util.Scanner;
 public class BulletinView {
     private final BulletinService service;
     private final Scanner scanner;
+    private final DataSource ds;
     private final DecimalFormat df = new DecimalFormat("#0.00");
     private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-    public BulletinView(BulletinService service, Scanner scanner) {
+    public BulletinView(BulletinService service, Scanner scanner, DataSource ds) {
         this.service = service;
         this.scanner = scanner;
+        this.ds = ds;
     }
 
     public void menu() {
@@ -206,13 +210,14 @@ public class BulletinView {
         try {
             System.out.print("Id bulletin à supprimer : ");
             int id = Integer.parseInt(scanner.nextLine().trim());
+            Connection c = ds.getConnection();
             System.out.print("Confirmez suppression (o/N) : ");
             String conf = scanner.nextLine().trim().toLowerCase();
             if (!"o".equals(conf) && !"oui".equals(conf)) {
                 System.out.println("Suppression annulée.");
                 return;
             }
-            service.delete(id);
+            service.delete(c,id);
             System.out.println("Suppression effectuée (si bulletin existait).");
         } catch (NumberFormatException ex) {
             System.out.println("Id invalide.");

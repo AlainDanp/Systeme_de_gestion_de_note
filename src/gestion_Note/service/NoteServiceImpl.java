@@ -4,6 +4,7 @@ import Event.EventDispatcher;
 import Event.EventListener;
 import Event.NoteCreatedEvent;
 import Event.NoteUpdatedEvent;
+import MVC.SecurityContext;
 import gestion_Note.model.Note;
 import gestion_Note.dao.NoteDao;
 
@@ -22,10 +23,12 @@ public class NoteServiceImpl implements NoteService{
     private final EventDispatcher eventDispatcher;
     private Integer currentUserId;
     private String currentUserName;
+    private final SecurityContext securityContext;
 
-    public NoteServiceImpl(DataSource ds, NoteDao noteDao) {
+    public NoteServiceImpl(DataSource ds, NoteDao noteDao, SecurityContext securityContext) {
         this.ds = ds;
         this.noteDao = noteDao;
+        this.securityContext = securityContext;
         this.eventDispatcher = EventDispatcher.getInstance();
         }
 
@@ -36,41 +39,44 @@ public class NoteServiceImpl implements NoteService{
 
     @Override
     public Note creeNote(Note note) {
+        securityContext.exigerDroitSurMatier(note.getMatiere());
         validerNote(note);
 
+        Note created;
         try (Connection c = ds.getConnection()) {
             c.setAutoCommit(false);
 
             try {
-                Note created = noteDao.save(note);
+                created = noteDao.save(c,note);
                 c.commit();
-
-                //  Déclencher l'événement NOTE_CREATED
-                if (currentUserId != null && currentUserName != null) {
-                    NoteCreatedEvent event = new NoteCreatedEvent(
-                            currentUserId,
-                            currentUserName,
-                            created,
-                            created.getEtudiantNomComplet(),
-                            created.getMatiere()
-                    );
-                    eventDispatcher.dispatch(event);
-                }
-
-                return created;
-
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 c.rollback();
                 throw e;
+            }finally {
+                c.setAutoCommit(true);
             }
         } catch (SQLException ex) {
             throw new RuntimeException("Erreur lors de la création de la note", ex);
         }
+        if (currentUserId != null && currentUserName != null){
+            eventDispatcher.dispatch(new NoteCreatedEvent(
+                    currentUserId,
+                    currentUserName,
+                    created,
+                    created.getEtudiantNomComplet(),
+                    created.getMatiere()
+            ));
+        }
+        return created;
     }
-
 
     @Override
     public void modifierNote(Note note) {
+        Note existante = noteDao.findById(note.getId()).orElseThrow(()
+                -> new IllegalArgumentException("Note introuvable :" + note.getId()));
+        securityContext.exigerDroitSurMatier(existante.getMatiere());
+        securityContext.exigerDroitSurMatier(note.getMatiere());
+
         if (note  == null) {
             throw new IllegalArgumentException("L'ID de la note est requis");
         }
@@ -109,11 +115,14 @@ public class NoteServiceImpl implements NoteService{
     }
 
     @Override
-    public void supprimerNote(Integer id) {
+    public void supprimerNote(Connection c,Integer id) {
+        Note existante = noteDao.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Note introuvable : " + id));
+        securityContext.exigerDroitSurMatier(existante.getMatiere());
         if (id == null) {
             throw new IllegalArgumentException("L'ID est requis");
         }
-        noteDao.delete(id);
+        noteDao.delete(c,id);
     }
 
     @Override
@@ -126,9 +135,8 @@ public class NoteServiceImpl implements NoteService{
 
     @Override
     public List<Note> listerNotesParEtudiant(Integer etudiantId) {
-        if (etudiantId == null) {
-            throw new IllegalArgumentException("L'ID de l'étudiant est requis");
-        }
+        if (etudiantId == null) throw new IllegalArgumentException("L'ID de l'étudiant est requis");
+        securityContext.exigerAccesEtudiant(etudiantId);
         return noteDao.findByEtudiant(etudiantId);
     }
 

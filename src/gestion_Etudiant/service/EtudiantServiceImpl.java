@@ -3,6 +3,7 @@ package gestion_Etudiant.service;
 import Event.EtudiantCreatedEvent;
 import Event.EventDispatcher;
 import MVC.PasswordUtil;
+import MVC.SecurityContext;
 import gestion_Etudiant.dao.EtudiantDao;
 import gestion_Etudiant.model.Etudiant;
 import javax.sql.DataSource;
@@ -19,10 +20,12 @@ public class EtudiantServiceImpl implements EtudiantService {
     private final EventDispatcher eventDispatcher;
     private Integer currentUserId;
     private String currentUserName;
+    private final SecurityContext securityContext;
 
-    public EtudiantServiceImpl(DataSource ds, EtudiantDao etudiantDao){
+    public EtudiantServiceImpl(DataSource ds, EtudiantDao etudiantDao, SecurityContext securityContext){
         this.ds = ds;
         this.etudiantDao = etudiantDao;
+        this.securityContext = securityContext;
         this.eventDispatcher = EventDispatcher.getInstance();
     }
 
@@ -88,7 +91,7 @@ public class EtudiantServiceImpl implements EtudiantService {
     }
 
     @Override
-    public void supprimerEtudiant(Integer id){
+    public void supprimerEtudiant(Connection c,Integer id){
         if(id == null){
             throw new IllegalArgumentException("L'ID est requis");
         }
@@ -104,7 +107,7 @@ public class EtudiantServiceImpl implements EtudiantService {
                     "Impossible de supprimer : cet étudiant a des bulletins enregistrés"
             );
         }
-        etudiantDao.delete(id);
+        etudiantDao.delete(c,id);
     }
 
     @Override

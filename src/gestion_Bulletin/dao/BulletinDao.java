@@ -5,6 +5,7 @@ import gestion_Bulletin.model.Bulletin;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -16,23 +17,31 @@ public class BulletinDao {
         this.ds = ds;
     }
 
-    public Bulletin save(Bulletin b) {
+    public Bulletin save(Bulletin bulletin){
+        try(Connection c = ds.getConnection()) {
+            return save(c, bulletin);
+        }catch (SQLException ex){
+            throw new RuntimeException("Erreur lors de l'insertion du bulletin", ex);
+        }
+    }
+
+    public Bulletin save(Connection c,Bulletin b) {
         String sql = "INSERT INTO bulletin (id_etudiant, periode, moyenne, moyenne_de_la_classe) " +
                 "VALUES (?, ?, ?, ?) RETURNING id, created_at";
-        try (Connection c = ds.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
+        try (PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, b.getEtudiantId());
             ps.setString(2, b.getPeriode());
             if (b.getMoyenne() != null) ps.setDouble(3, b.getMoyenne()); else ps.setNull(3, Types.NUMERIC);
             if (b.getMoyennDelaClasse() != null) ps.setDouble(4, b.getMoyennDelaClasse()); else ps.setNull(4, Types.NUMERIC);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                b.setId(rs.getInt("id"));
-                Timestamp ts = rs.getTimestamp("created_at");
-                if (ts != null) b.setCreatedAt(ts.toInstant().atOffset(OffsetDateTime.now().getOffset()));
-            }
 
-            return findById(b.getId()).orElse(b);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    b.setId(rs.getInt("id"));
+                    Timestamp ts = rs.getTimestamp("created_at");
+                    if (ts != null) b.setCreatedAt(ts.toLocalDateTime().atOffset(ZoneOffset.UTC));
+                }
+            }
+            return b;
 
         } catch (SQLException ex) {
             throw new RuntimeException("Erreur lors de l'insertion du bulletin", ex);
@@ -70,9 +79,9 @@ public class BulletinDao {
         }
     }
 
-    public void delete(int id) {
+    public void delete(Connection c,int id) {
         final String sql = "DELETE FROM bulletin WHERE id = ?";
-        try (Connection c = ds.getConnection();
+        try (
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, id);
             ps.executeUpdate();
@@ -127,6 +136,26 @@ public class BulletinDao {
         }
     }
 
+    public List<Bulletin> findAll() {
+        final String sql = "SELECT b.id, b.id_etudiant, b.periode, b.moyenne, b.moyenne_de_la_classe, b.created_at, " +
+                "       e.nom as etudiant_nom, e.prenom as etudiant_prenom, c.niveau as classe_niveau " +
+                "FROM bulletin b " +
+                "JOIN etudiant e ON b.id_etudiant = e.id " +
+                "LEFT JOIN Classe c ON e.classe_id = c.id_classe " +
+                "ORDER BY b.periode DESC, e.nom";
+        List<Bulletin> list = new ArrayList<>();
+        try (Connection c = ds.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(mapRow(rs));
+            }
+            return list;
+        } catch (SQLException ex) {
+            throw new RuntimeException("Erreur findAll bulletins", ex);
+        }
+    }
+
     private Bulletin mapRow(ResultSet rs) throws SQLException {
         Bulletin b = new Bulletin();
         b.setId(rs.getInt("id"));
@@ -152,5 +181,6 @@ public class BulletinDao {
         return b;
 
     }
+
 }
 

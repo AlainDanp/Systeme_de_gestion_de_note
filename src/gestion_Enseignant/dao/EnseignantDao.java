@@ -16,11 +16,19 @@ public class EnseignantDao {
         this.ds = ds;
     }
 
-    public Enseignant save(Enseignant enseignant) {
+    public Enseignant save(Enseignant enseignant){
+        try(Connection c = ds.getConnection()) {
+            return save(c, enseignant);
+        }catch (SQLException ex){
+            throw new RuntimeException("Erreur lors de l'insertion de l'enseignant", ex);
+        }
+    }
+
+    public Enseignant save(Connection c,Enseignant enseignant) {
         String sql = "INSERT INTO Enseignant (nom, prenom, email, login, password_hash, actif) " +
                 "VALUES (?, ?, ?, ?, ?, ?) RETURNING id_enseignant";
 
-        try (Connection c = ds.getConnection();
+        try (
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, enseignant.getNom());
             ps.setString(2, enseignant.getPrenom());
@@ -29,12 +37,14 @@ public class EnseignantDao {
             ps.setString(5, enseignant.getPasswordHash());
             ps.setBoolean(6, enseignant.isActif());
 
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                enseignant.setIdEnseignant(rs.getInt("id_enseignant"));
+
+            try(ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    enseignant.setIdEnseignant(rs.getInt("id_enseignant"));
+                }
             }
 
-            return findById(enseignant.getIdEnseignant()).orElse(enseignant);
+            return enseignant;
 
         } catch (SQLException ex) {
             throw new RuntimeException("Erreur lors de la création de l'enseignant", ex);
@@ -131,10 +141,10 @@ public class EnseignantDao {
         }
     }
 
-    public void delete(int id) {
+    public void delete(Connection c,int id) {
         String sql = "DELETE FROM Enseignant WHERE id_enseignant = ?";
 
-        try (Connection c = ds.getConnection();
+        try (
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, id);
             ps.executeUpdate();

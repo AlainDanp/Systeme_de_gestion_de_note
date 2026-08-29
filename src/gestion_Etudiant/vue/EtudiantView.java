@@ -4,6 +4,9 @@ package gestion_Etudiant.vue;
 import gestion_Etudiant.service.EtudiantService;
 import gestion_Etudiant.model.Etudiant;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
@@ -13,11 +16,13 @@ public class EtudiantView {
 
     private final EtudiantService service;
     private final Scanner scanner;
+    private final DataSource ds;
     private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-    public EtudiantView(EtudiantService service, Scanner scanner) {
+    public EtudiantView(EtudiantService service, Scanner scanner, DataSource ds) {
         this.service = service;
         this.scanner = scanner;
+        this.ds = ds;
     }
     public void menu() {
         while (true) {
@@ -195,6 +200,7 @@ public class EtudiantView {
         System.out.print("\nID de l'étudiant : ");
         try {
             int id = Integer.parseInt(scanner.nextLine().trim());
+            Connection c = ds.getConnection();
 
             Optional<Etudiant> opt = service.getEtudiant(id);
             if (opt.isEmpty()) {
@@ -208,13 +214,13 @@ public class EtudiantView {
             String confirmation = scanner.nextLine().trim().toLowerCase();
 
             if ("o".equals(confirmation) || "oui".equals(confirmation)) {
-                service.supprimerEtudiant(id);
+                service.supprimerEtudiant(c,id);
                 System.out.println(" Étudiant supprimé avec succès !");
             } else {
                 System.out.println(" Suppression annulée.");
             }
 
-        } catch (NumberFormatException ex) {
+        } catch (NumberFormatException | SQLException ex) {
             System.out.println(" ID invalide.");
         }
 

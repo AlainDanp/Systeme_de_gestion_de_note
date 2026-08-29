@@ -37,8 +37,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             return Optional.empty();
         }
 
-        String passwordHash = PasswordUtil.hashPassword(password);
-
         // Chercher d'abord dans les enseignants
         Optional<Admin> admin = adminDao.findByLogin(login);
         if (admin.isPresent()) {
@@ -52,7 +50,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 adminDao.updateDerniereConnexion(a.getIdAdmin());
                 currentUser = a;
 
-                // 🔥 Déclencher l'événement USER_LOGIN
+                //  Déclencher l'événement USER_LOGIN
                 UserLoginEvent event = new UserLoginEvent(a.getId(), a.getNomComplet(), a.getRole());
                 eventDispatcher.dispatch(event);
 
@@ -73,6 +71,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             // Vérifier le mot de passe
             if (PasswordUtil.verifyPassword(password, e.getPasswordHash())) {
                 // Mettre à jour la dernière connexion
+                if (PasswordUtil.besoinDeMigration(e.getPasswordHash())) {
+                    String nouveau = PasswordUtil.hashPassword(password);
+                    enseignantDao.updatePassword(e.getIdEnseignant(), nouveau);
+                    e.setPasswordHash(nouveau);
+                }
                 enseignantDao.updateDerniereConnexion(e.getIdEnseignant());
 
                 // Stocker dans la session
@@ -91,20 +94,19 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         if (etudiant.isPresent()) {
             Etudiant e = etudiant.get();
 
-            // Vérifier si le compte est actif
-            if (!e.isActif()) {
-                throw new IllegalStateException("Compte désactivé");
-            }
 
             // Vérifier le mot de passe
             if (PasswordUtil.verifyPassword(password, e.getPasswordHash())) {
+                if (!e.isActif()) {
+                    throw new IllegalStateException("Compte désactivé");
+                }
                 // Mettre à jour la dernière connexion
                 etudiantDao.updateDerniereConnexion(e.getIdEtudiant());
 
                 // Stocker dans la session
                 currentUser = e;
 
-                // 🔥 Déclencher l'événement USER_LOGIN
+                //  Déclencher l'événement USER_LOGIN
                 UserLoginEvent event = new UserLoginEvent(e.getId(), e.getNomComplet(), e.getRole());
                 eventDispatcher.dispatch(event);
 
@@ -126,6 +128,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
             System.out.println(" Déconnexion de : " + currentUser.getNomComplet());
             currentUser = null;
+        }
+    }
+
+    public class GenererHash {
+        public static void main(String[] args) {
+            System.out.println(MVC.PasswordUtil.hashPassword("Test1234"));
         }
     }
 

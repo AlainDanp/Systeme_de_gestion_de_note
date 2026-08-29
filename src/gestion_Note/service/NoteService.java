@@ -1,13 +1,15 @@
 package gestion_Note.service;
 
 import gestion_Note.model.Note;
+
+import java.sql.Connection;
 import java.util.List;
 import java.util.Optional;
 
 public interface NoteService {
     Note creeNote(Note note);
     void modifierNote(Note note);
-    void supprimerNote(Integer id);
+    void supprimerNote(Connection c,Integer id);
     Optional<Note> getNote(Integer id);
     List<Note> listerNotesParEtudiant(Integer etudiantId);
     List<Note> listerNotesParEtudiantEtPeriode(Integer etudiantId, String periode);

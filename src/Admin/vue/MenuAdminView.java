@@ -75,7 +75,7 @@ public class MenuAdminView {
         System.out.println("╠════════════════════════════════════════════════════════════════╣");
         System.out.println("║                      GESTION                                   ║");
         System.out.println("╠════════════════════════════════════════════════════════════════╣");
-        System.out.println("║  1. 👨‍🏫 Gestion des Enseignants                                ║");
+        System.out.println("║  1. 👨‍🏫 Gestion des Enseignants                                 ║");
         System.out.println("║  2. 👨‍🎓 Gestion des Étudiants                                   ║");
         System.out.println("║  3. 🏫 Gestion des Classes                                     ║");
         System.out.println("║  4. 📚 Gestion des Matières                                    ║");
@@ -87,7 +87,7 @@ public class MenuAdminView {
         System.out.println("╠════════════════════════════════════════════════════════════════╣");
         System.out.println("║                      COMPTE                                    ║");
         System.out.println("╠════════════════════════════════════════════════════════════════╣");
-        System.out.printf("║  7. 📬 Notifications%-44s║%n", notificationBadge);
+        System.out.printf("║  7. 📬 Notifications%-41s║%n", notificationBadge);
         System.out.println("║  8. 👤 Mon Profil                                              ║");
         System.out.println("║  0. 🚪 Déconnexion                                             ║");
         System.out.println("╚════════════════════════════════════════════════════════════════╝");

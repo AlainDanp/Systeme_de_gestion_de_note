@@ -1,63 +1,46 @@
-import Admin.dao.AdminDao;
 import Admin.vue.MenuAdminView;
 import Auhentifcation.AuthenticationService;
-import Auhentifcation.AuthenticationServiceImpl;
 import Auhentifcation.LoginView;
 import Auhentifcation.ProfilView;
-import Event.EventDispatcher;
-import Event.listener.*;
 import MVC.NotificationView;
 import MVC.Role;
+import MVC.SecurityContext;
 import MVC.User;
-import gestion_Bulletin.dao.BulletinDao;
 import BD.DataSourceProvider;
+import Event.listener.StatisticsListener;
+import core.AppContext;
 import gestion_Bulletin.service.BulletinService;
 import gestion_Bulletin.service.BulletinServiceImpl;
 import gestion_Bulletin.vue.BulletinView;
-import gestion_Classe.dao.ClasseDao;
 import gestion_Classe.service.ClasseService;
 import gestion_Classe.service.ClasseServiceImpl;
 import gestion_Classe.vue.ClasseView;
-import gestion_Enseignant.dao.EnseignantDao;
+import gestion_Enseignant.model.Enseignant;
 import gestion_Enseignant.service.EnseignantService;
 import gestion_Enseignant.service.EnseignantServiceImpl;
 import gestion_Enseignant.vue.EnseignantView;
 import gestion_Enseignant.vue.MenuEnseignantView;
-import gestion_Etudiant.dao.EtudiantDao;
 import gestion_Etudiant.service.EtudiantService;
 import gestion_Etudiant.service.EtudiantServiceImpl;
 import gestion_Etudiant.vue.EtudiantView;
 import gestion_Etudiant.vue.MenuEtudiantView;
-import gestion_Matiere.dao.MatiereDao;
 import gestion_Matiere.service.MatiereService;
-import gestion_Matiere.service.MatiereServiceImpl;
 import gestion_Matiere.vue.MatiereView;
-import gestion_Note.dao.NoteDao;
 import gestion_Note.service.NoteService;
 import gestion_Note.service.NoteServiceImpl;
 import gestion_Note.vue.NoteView;
 
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Optional;
 import java.util.Scanner;
 
 
 public class Application {
 
+    private AppContext appContext;
     private DataSource dataSource;
     private Scanner scanner;
-
-    // DAO
-    private AdminDao adminDao;
-    private BulletinDao bulletinDao;
-    private NoteDao noteDao;
-    private MatiereDao matiereDao;
-    private EnseignantDao enseignantDao;
-    private EtudiantDao etudiantDao;
-    private ClasseDao classeDao;
 
     // Services
     private BulletinService bulletinService;
@@ -68,13 +51,7 @@ public class Application {
     private ClasseService classeService;
     private AuthenticationService authenticationService;
 
-    // Système d'événements
-    private EventDispatcher eventDispatcher;
-    private ConsoleLoggerListener consoleLogger;
-    private NotificationListener notificationListener;
-    private FileLoggerListener fileLogger;
     private StatisticsListener statisticsListener;
-    private EmailNotificationListener emailListener;
 
     // Vues communes
     private LoginView loginView;
@@ -94,59 +71,39 @@ public class Application {
     private MenuEnseignantView menuEnseignantView;
     private MenuEtudiantView menuEtudiantView;
 
+    private SecurityContext securityContext;
+
 
     private void initialiser() {
         System.out.println("Démarrage de l'application...");
 
-        try {
-            dataSource = DataSourceProvider.getDataSource();
-        } catch (Exception e) {
-            System.err.println("Erreur lors de l'initialisation du DataSource");
-            e.printStackTrace();
-            System.exit(1);
-        }
+        appContext = AppContext.build();
 
-        // Test de connexion
-        if (!testerConnexion()) {
-            System.err.println(" Impossible de se connecter à la base de données");
-            System.err.println("Vérifiez votre configuration (JDBC_URL, JDBC_USER, JDBC_PASSWORD)");
-            System.exit(1);
-        }
+        dataSource = appContext.getDataSource();
+        securityContext = appContext.getSecurityContext();
+        statisticsListener = appContext.getStatisticsListener();
 
         scanner = new Scanner(System.in);
 
-        initialiserSystemeEvenements();
-
-        adminDao = new AdminDao(dataSource);
-        bulletinDao = new BulletinDao(dataSource);
-        noteDao = new NoteDao(dataSource);
-        matiereDao = new MatiereDao(dataSource);
-        enseignantDao = new EnseignantDao(dataSource);
-        etudiantDao = new EtudiantDao(dataSource);
-        classeDao = new ClasseDao(dataSource);
-
-       // System.out.println(" DAO initialisés");
-
-        noteService = new NoteServiceImpl(dataSource, noteDao);
-        bulletinService = new BulletinServiceImpl(dataSource, bulletinDao);
-        matiereService = new MatiereServiceImpl(dataSource, matiereDao);
-        enseignantService = new EnseignantServiceImpl(dataSource, enseignantDao);
-        etudiantService = new EtudiantServiceImpl(dataSource, etudiantDao);
-        classeService = new ClasseServiceImpl(dataSource, classeDao);
-        authenticationService = new AuthenticationServiceImpl(adminDao,enseignantDao, etudiantDao);
-       // System.out.println("Services initialisés");
+        noteService = appContext.getNoteService();
+        bulletinService = appContext.getBulletinService();
+        matiereService = appContext.getMatiereService();
+        enseignantService = appContext.getEnseignantService();
+        etudiantService = appContext.getEtudiantService();
+        classeService = appContext.getClasseService();
+        authenticationService = appContext.getAuthenticationService();
 
         loginView = new LoginView(authenticationService, scanner);
         profilView = new ProfilView(authenticationService, scanner);
-        notificationView = new NotificationView(notificationListener, scanner);
+        notificationView = new NotificationView(appContext.getNotificationListener(), scanner);
 
         // Initialisation des vues
-        bulletinView = new BulletinView(bulletinService, scanner);
-        noteView = new NoteView(noteService, scanner);
-        classeView = new ClasseView(classeService, scanner);
+        bulletinView = new BulletinView(bulletinService, scanner, dataSource);
+        noteView = new NoteView(noteService, scanner, dataSource);
+        classeView = new ClasseView(classeService, scanner,dataSource);
         matiereView = new MatiereView(matiereService, scanner);
-        enseignantView = new EnseignantView(enseignantService, scanner);
-        etudiantView = new EtudiantView(etudiantService, scanner);
+        enseignantView = new EnseignantView(enseignantService, scanner, dataSource);
+        etudiantView = new EtudiantView(etudiantService, scanner, dataSource);
 
         menuEnseignantView = new MenuEnseignantView(
                 authenticationService, scanner,
@@ -155,7 +112,7 @@ public class Application {
         );
         menuEtudiantView = new MenuEtudiantView(
                 authenticationService, noteService, bulletinService,
-                profilView, notificationView, scanner // 🔥 Passée correctement
+                profilView, notificationView, scanner //  Passée correctement
         );
         menuAdminView = new MenuAdminView(
                 authenticationService, scanner,
@@ -169,35 +126,6 @@ public class Application {
         System.out.println("Application prête !\n");
 
 
-    }
-
-    private void initialiserSystemeEvenements() {
-        eventDispatcher = EventDispatcher.getInstance();
-
-        consoleLogger = new ConsoleLoggerListener();
-        notificationListener = new NotificationListener();
-        fileLogger = new FileLoggerListener("logs/application.log");
-        statisticsListener = new StatisticsListener();
-        emailListener = new EmailNotificationListener();
-
-        // Enregistrer les listeners
-//        eventDispatcher.registerListener(consoleLogger);
-//        eventDispatcher.registerListener(notificationListener);
-//        eventDispatcher.registerListener(fileLogger);
-//        eventDispatcher.registerListener(statisticsListener);
-//        eventDispatcher.registerListener(emailListener);
-    }
-
-
-    private boolean testerConnexion() {
-        try (Connection conn = dataSource.getConnection()) {
-            //System.out.println(" Connexion à la base de données réussie");
-            //System.out.println("   Database : " + conn.getCatalog());
-            return true;
-        } catch (SQLException e) {
-            System.err.println(" Erreur de connexion : " + e.getMessage());
-            return false;
-        }
     }
 
     /**
@@ -412,6 +340,9 @@ public class Application {
         if (etudiantService instanceof EtudiantServiceImpl) {
             ((EtudiantServiceImpl) etudiantService).setCurrentUser(user.getId(), user.getNomComplet());
         }
+
+        String matiere = (user instanceof Enseignant) ? ((Enseignant) user).getMatiereNom() : null;
+        securityContext.setUser(user.getId(), user.getNomComplet(), user.getRole(), matiere);
     }
     private void afficherStatistiquesSession() {
         System.out.println("\n╔════════════════════════════════════════════════════════════════╗");
