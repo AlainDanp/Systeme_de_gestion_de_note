@@ -14,7 +14,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -45,7 +44,7 @@ public class BulletinScreen {
     private final DataSource dataSource;
     private final Runnable onBack;
     private final TableView<Bulletin> table = new TableView<>();
-    private final ComboBox<Etudiant> filtreEtudiant;
+    private final EtudiantPicker filtreEtudiant;
 
     public BulletinScreen(BulletinService bulletinService, EtudiantService etudiantService,
                            DataSource dataSource, Runnable onBack) {
@@ -53,7 +52,7 @@ public class BulletinScreen {
         this.etudiantService = etudiantService;
         this.dataSource = dataSource;
         this.onBack = onBack;
-        this.filtreEtudiant = EtudiantPicker.build(etudiantService.listerTousLesEtudiants());
+        this.filtreEtudiant = new EtudiantPicker(etudiantService.listerTousLesEtudiants());
     }
 
     public Parent build() {
@@ -78,7 +77,7 @@ public class BulletinScreen {
         toutes.setOnAction(e -> rafraichir());
 
         FlowPane filtres = new FlowPane(12, 10,
-                ScreenUtils.filterGroup("Étudiant", filtreEtudiant, rechercher), toutes);
+                ScreenUtils.filterGroup("Étudiant", filtreEtudiant.getNode(), rechercher), toutes);
         filtres.getStyleClass().add("filter-bar");
 
         VBox top = new VBox(header, filtres);
@@ -168,7 +167,7 @@ public class BulletinScreen {
     }
 
     private void genererBulletin() {
-        ComboBox<Etudiant> etudiantChoice = EtudiantPicker.build(etudiantService.listerTousLesEtudiants());
+        EtudiantPicker etudiantChoice = new EtudiantPicker(etudiantService.listerTousLesEtudiants());
         TextField periodeField = new TextField();
         periodeField.setPromptText("YYYY-T1 ou YYYY-S1");
 
@@ -176,7 +175,7 @@ public class BulletinScreen {
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(20));
-        grid.addRow(0, new Label("Étudiant :"), etudiantChoice);
+        grid.addRow(0, new Label("Étudiant :"), etudiantChoice.getNode());
         grid.addRow(1, new Label("Période :"), periodeField);
 
         Dialog<ButtonType> dialog = new Dialog<>();
@@ -210,7 +209,7 @@ public class BulletinScreen {
     }
 
     private void creerManuel() {
-        ComboBox<Etudiant> etudiantChoice = EtudiantPicker.build(etudiantService.listerTousLesEtudiants());
+        EtudiantPicker etudiantChoice = new EtudiantPicker(etudiantService.listerTousLesEtudiants());
         TextField periodeField = new TextField();
         periodeField.setPromptText("YYYY-T1 ou YYYY-S1");
         TextField moyenneField = new TextField();
@@ -220,7 +219,7 @@ public class BulletinScreen {
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(20));
-        grid.addRow(0, new Label("Étudiant :"), etudiantChoice);
+        grid.addRow(0, new Label("Étudiant :"), etudiantChoice.getNode());
         grid.addRow(1, new Label("Période :"), periodeField);
         grid.addRow(2, new Label("Moyenne :"), moyenneField);
         grid.addRow(3, new Label("Moyenne classe :"), moyenneClasseField);

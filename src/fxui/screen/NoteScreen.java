@@ -13,7 +13,6 @@ import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -41,7 +40,7 @@ public class NoteScreen {
     private final Runnable onBack;
     private final TableView<Note> table = new TableView<>();
 
-    private final ComboBox<Etudiant> filtreEtudiant;
+    private final EtudiantPicker filtreEtudiant;
     private final TextField filtrePeriode = new TextField();
     private final ChoiceBox<String> filtreMatiere = new ChoiceBox<>();
 
@@ -50,7 +49,7 @@ public class NoteScreen {
         this.etudiantService = etudiantService;
         this.dataSource = dataSource;
         this.onBack = onBack;
-        this.filtreEtudiant = EtudiantPicker.build(etudiantService.listerTousLesEtudiants());
+        this.filtreEtudiant = new EtudiantPicker(etudiantService.listerTousLesEtudiants());
     }
 
     public Parent build() {
@@ -96,7 +95,7 @@ public class NoteScreen {
         toutes.setOnAction(e -> rafraichir());
 
         FlowPane filtres = new FlowPane(12, 10,
-                ScreenUtils.filterGroup("Étudiant", filtreEtudiant, rechercherEtudiant),
+                ScreenUtils.filterGroup("Étudiant", filtreEtudiant.getNode(), rechercherEtudiant),
                 ScreenUtils.filterGroup("Période", filtrePeriode, rechercherPeriode),
                 ScreenUtils.filterGroup("Matière", filtreMatiere, rechercherMatiere),
                 etudiantEtPeriode, moyenne, toutes);
@@ -256,9 +255,10 @@ public class NoteScreen {
         dialog.setTitle(edition ? "Modifier la note" : "Nouvelle note");
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
-        ComboBox<Etudiant> etudiantChoice = EtudiantPicker.build(etudiantService.listerTousLesEtudiants());
+        List<Etudiant> etudiants = etudiantService.listerTousLesEtudiants();
+        EtudiantPicker etudiantChoice = new EtudiantPicker(etudiants);
         if (edition) {
-            etudiantChoice.getItems().stream()
+            etudiants.stream()
                     .filter(et -> et.getIdEtudiant().equals(existante.getEtudiantId()))
                     .findFirst()
                     .ifPresent(etudiantChoice::setValue);
@@ -275,7 +275,7 @@ public class NoteScreen {
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(20));
-        grid.addRow(0, new Label("Étudiant :"), etudiantChoice);
+        grid.addRow(0, new Label("Étudiant :"), etudiantChoice.getNode());
         grid.addRow(1, new Label("Période :"), periodeField);
         grid.addRow(2, new Label("Matière :"), matiereChoice);
         grid.addRow(3, new Label("Valeur (/20) :"), valeurField);
