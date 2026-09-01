@@ -32,14 +32,15 @@ public class ProfilScreen {
         User user = authenticationService.getCurrentUser().orElse(null);
 
         Label titre = new Label("Mon Profil");
-        titre.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        titre.getStyleClass().add("screen-title");
 
         Button retour = new Button("Retour");
+        retour.getStyleClass().add("btn-outline");
         retour.setOnAction(e -> onBack.run());
 
         HBox header = new HBox(20, retour, titre);
         header.setAlignment(Pos.CENTER_LEFT);
-        header.setPadding(new Insets(10));
+        header.getStyleClass().add("screen-header");
 
         VBox root = new VBox(20, header);
         root.setPadding(new Insets(10));
@@ -75,6 +76,7 @@ public class ProfilScreen {
         confirmation.setPromptText("Confirmer le nouveau mot de passe");
 
         Button changer = new Button("Changer le mot de passe");
+        changer.getStyleClass().addAll("btn", "btn-primary");
         Label message = new Label();
 
         changer.setOnAction(e -> {

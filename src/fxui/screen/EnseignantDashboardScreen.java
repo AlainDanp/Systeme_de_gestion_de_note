@@ -3,24 +3,28 @@ package fxui.screen;
 import MVC.User;
 import core.AppContext;
 import fxui.Navigator;
+import fxui.Sidebar;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Parent;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.Tooltip;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
+import java.util.List;
+
 /**
- * Tableau de bord Enseignant. Remplace gestion_Enseignant.vue.MenuEnseignantView.afficher().
- * Coquille de navigation : aucun écran enseignant n'est encore migré dans cette passe
- * (Notes/Bulletins/Matières restent accessibles via la console pour l'instant).
+ * Tableau de bord Enseignant : sidebar persistante + contenu central (refonte Figma).
+ * Réutilise les mêmes écrans Notes/Bulletins/Matières que l'Admin (même service/DAO, la couche
+ * SecurityContext restreint déjà l'écriture des notes à la matière de l'enseignant connecté).
  */
 public class EnseignantDashboardScreen {
 
     private final AppContext appContext;
     private final Navigator navigator;
     private final User enseignant;
+    private final StackPane content = new StackPane();
+    private Sidebar sidebar;
 
     public EnseignantDashboardScreen(AppContext appContext, Navigator navigator, User enseignant) {
         this.appContext = appContext;
@@ -29,39 +33,50 @@ public class EnseignantDashboardScreen {
     }
 
     public Parent build() {
-        Label titre = new Label("Bienvenue, " + enseignant.getNomComplet() + " (Enseignant)");
-        titre.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        content.getStyleClass().add("content-card");
 
-        Button notes = boutonAVenir("Gestion des Notes");
-        Button bulletins = boutonAVenir("Gestion des Bulletins");
-        Button matieres = boutonAVenir("Mes Matières");
-        Button notifications = boutonAVenir("Notifications");
+        List<Sidebar.Entry> entries = List.of(
+                new Sidebar.Entry("📝", "Gestion des\nNotes", () ->
+                        new NoteScreen(appContext.getNoteService(), appContext.getDataSource(),
+                                this::showOverview).build()),
+                new Sidebar.Entry("📊", "Gestion des\nBulletins", () ->
+                        new BulletinScreen(appContext.getBulletinService(), appContext.getDataSource(),
+                                this::showOverview).build()),
+                new Sidebar.Entry("📘", "Mes Matières", () ->
+                        new MatiereScreen(appContext.getMatiereService(), navigator, this::showOverview).build()),
+                new Sidebar.Entry("👤", "Mon Profil", () ->
+                        new ProfilScreen(appContext.getAuthenticationService(), this::showOverview).build())
+        );
 
-        Button profil = new Button("Mon Profil");
-        profil.setOnAction(e -> navigator.show(
-                new ProfilScreen(appContext.getAuthenticationService(), this::retour).build(),
-                "Mon Profil"));
+        sidebar = new Sidebar(entries,
+                () -> setContent(new NotificationScreen(appContext.getNotificationListener(), enseignant.getId(),
+                        this::showOverview).build()),
+                () -> {
+                    appContext.getAuthenticationService().logout();
+                    navigator.showLogin();
+                },
+                this::setContent);
 
-        Button deconnexion = new Button("Déconnexion");
-        deconnexion.setOnAction(e -> {
-            appContext.getAuthenticationService().logout();
-            navigator.showLogin();
-        });
+        showOverview();
 
-        VBox root = new VBox(10, titre, notes, bulletins, matieres, notifications, profil, deconnexion);
-        root.setAlignment(Pos.CENTER);
-        root.setPadding(new Insets(30));
+        BorderPane root = new BorderPane();
+        root.getStyleClass().add("content-shell");
+        root.setLeft(sidebar.getNode());
+        root.setCenter(content);
         return root;
     }
 
-    private void retour() {
-        navigator.show(build(), "Tableau de bord - Enseignant");
+    private void setContent(Parent node) {
+        content.getChildren().setAll(node);
     }
 
-    private Button boutonAVenir(String texte) {
-        Button bouton = new Button(texte);
-        bouton.setDisable(true);
-        bouton.setTooltip(new Tooltip("À venir"));
-        return bouton;
+    private void showOverview() {
+        sidebar.clearSelection();
+        Label titre = new Label("Bienvenue, " + enseignant.getNomComplet());
+        titre.getStyleClass().add("screen-title");
+        Label sousTitre = new Label("Enseignant — utilisez le menu à gauche pour gérer vos notes et bulletins.");
+        VBox box = new VBox(10, titre, sousTitre);
+        box.setPadding(new Insets(20));
+        setContent(box);
     }
 }

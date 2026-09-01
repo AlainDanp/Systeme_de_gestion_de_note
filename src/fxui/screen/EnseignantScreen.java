@@ -44,34 +44,41 @@ public class EnseignantScreen {
 
     public Parent build() {
         Label titre = new Label("Gestion des Enseignants");
-        titre.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        titre.getStyleClass().add("screen-title");
 
         Button retour = new Button("Retour");
+        retour.getStyleClass().add("btn-outline");
         retour.setOnAction(e -> onBack.run());
 
         HBox header = new HBox(20, retour, titre);
         header.setAlignment(Pos.CENTER_LEFT);
-        header.setPadding(new Insets(10));
+        header.getStyleClass().add("screen-header");
 
         configurerColonnes();
         rafraichir();
 
         Button nouveau = new Button("Nouvel enseignant");
+        nouveau.getStyleClass().addAll("btn", "btn-success");
         nouveau.setOnAction(e -> ouvrirFormulaire(null));
 
         Button modifier = new Button("Modifier");
+        modifier.getStyleClass().addAll("btn", "btn-warning");
         modifier.setOnAction(e -> avecSelection(this::ouvrirFormulaire));
 
         Button supprimer = new Button("Supprimer");
+        supprimer.getStyleClass().addAll("btn", "btn-danger");
         supprimer.setOnAction(e -> avecSelection(this::supprimer));
 
         Button toggleActif = new Button("Activer/Désactiver");
+        toggleActif.getStyleClass().addAll("btn", "btn-info");
         toggleActif.setOnAction(e -> avecSelection(this::toggleActif));
 
         Button resetPassword = new Button("Réinitialiser mot de passe");
+        resetPassword.getStyleClass().addAll("btn", "btn-maroon");
         resetPassword.setOnAction(e -> avecSelection(this::resetPassword));
 
         Button actualiser = new Button("Actualiser");
+        actualiser.getStyleClass().addAll("btn", "btn-primary");
         actualiser.setOnAction(e -> rafraichir());
 
         HBox actions = new HBox(10, nouveau, modifier, supprimer, toggleActif, resetPassword, actualiser);
@@ -112,6 +119,7 @@ public class EnseignantScreen {
     private void rafraichir() {
         ObservableList<Enseignant> data = FXCollections.observableArrayList(enseignantService.listerTousLesEnseignants());
         table.setItems(data);
+        table.refresh();
     }
 
     private void avecSelection(Consumer<Enseignant> action) {

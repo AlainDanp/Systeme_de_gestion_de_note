@@ -1,0 +1,217 @@
+/* Thème global de l'application, dérivé de la maquette Figma (login + sidebar admin). */
+
+.root {
+    -navy: #1B3A5C;
+    -navy-dark: #12283F;
+    -cream: #F1EAD9;
+    -bg-app: #7C8A9B;
+    -bg-content: #E9EAEC;
+    -white: #FFFFFF;
+    -text-dark: #26313D;
+    -text-muted: #6B7280;
+    -border: #D3D3D3;
+    -green: #2E8B4F;
+    -green-dark: #256F40;
+    -yellow: #C9B93B;
+    -yellow-dark: #A99B2C;
+    -red: #D9534F;
+    -red-dark: #C0392B;
+    -teal: #4FAE9B;
+    -teal-dark: #3C8C7C;
+    -maroon: #8B3A3A;
+    -maroon-dark: #732E2E;
+    -blue: #3B6EA5;
+    -blue-dark: #2E5883;
+    -periwinkle: #4A6FE0;
+    -periwinkle-dark: #3A58C0;
+
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 13px;
+    -fx-background-color: -bg-app;
+}
+
+/* ===== Layout générique ===== */
+.screen-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -text-dark;
+}
+
+.screen-header {
+    -fx-padding: 14 20 14 20;
+}
+
+.content-shell {
+    -fx-background-color: -bg-app;
+}
+
+.content-card {
+    -fx-background-color: -bg-content;
+    -fx-padding: 20;
+}
+
+/* ===== Sidebar ===== */
+.sidebar {
+    -fx-background-color: -cream;
+    -fx-padding: 24 12 16 12;
+    -fx-pref-width: 210;
+    -fx-min-width: 210;
+    -fx-spacing: 20;
+}
+
+.nav-item {
+    -fx-background-color: transparent;
+    -fx-text-fill: -text-dark;
+    -fx-font-size: 12.5px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 10 10 10 10;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+.nav-item:hover {
+    -fx-background-color: derive(-cream, -8%);
+}
+.nav-item:selected, .nav-item:armed {
+    -fx-background-color: #D9D9D9;
+    -fx-font-weight: bold;
+}
+
+.sidebar-bottom {
+    -fx-padding: 10 0 0 0;
+}
+
+/* ===== Boutons ===== */
+.btn {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 8 16 8 16;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+}
+.btn-primary { -fx-background-color: -blue; }
+.btn-primary:hover { -fx-background-color: -blue-dark; }
+.btn-success { -fx-background-color: -green; }
+.btn-success:hover { -fx-background-color: -green-dark; }
+.btn-warning { -fx-background-color: -yellow; -fx-text-fill: #3A3410; }
+.btn-warning:hover { -fx-background-color: -yellow-dark; }
+.btn-danger { -fx-background-color: -red; }
+.btn-danger:hover { -fx-background-color: -red-dark; }
+.btn-info { -fx-background-color: -teal; }
+.btn-info:hover { -fx-background-color: -teal-dark; }
+.btn-maroon { -fx-background-color: -maroon; }
+.btn-maroon:hover { -fx-background-color: -maroon-dark; }
+.btn-notif { -fx-background-color: -periwinkle; }
+.btn-notif:hover { -fx-background-color: -periwinkle-dark; }
+.btn-outline {
+    -fx-background-color: transparent;
+    -fx-text-fill: -text-dark;
+    -fx-border-color: -border;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-padding: 7 15 7 15;
+    -fx-cursor: hand;
+}
+.btn-outline:hover {
+    -fx-background-color: derive(-bg-content, 20%);
+}
+
+/* ===== TableView ===== */
+.table-view {
+    -fx-background-color: -white;
+    -fx-border-color: -border;
+    -fx-border-radius: 4;
+}
+.table-view .column-header-background {
+    -fx-background-color: -navy;
+    -fx-background-radius: 4 4 0 0;
+}
+.table-view .column-header, .table-view .filler {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent -navy-dark transparent transparent;
+    -fx-border-width: 0 1 0 0;
+}
+.table-view .column-header .label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER_LEFT;
+}
+.table-row-cell {
+    -fx-background-color: -white;
+    -fx-border-color: transparent transparent -border transparent;
+    -fx-table-cell-border-color: transparent;
+}
+.table-row-cell:odd {
+    -fx-background-color: derive(-bg-content, 40%);
+}
+.table-row-cell:selected {
+    -fx-background-color: derive(-blue, 70%);
+    -fx-text-fill: -text-dark;
+}
+
+/* ===== Login ===== */
+.login-root {
+    -fx-background-color: -white;
+}
+.login-left {
+    -fx-background-color: linear-gradient(to bottom right, -navy, -navy-dark);
+    -fx-pref-width: 380;
+    -fx-min-width: 380;
+}
+.login-right {
+    -fx-background-color: -white;
+    -fx-padding: 60 70 60 70;
+}
+.login-welcome {
+    -fx-font-size: 14px;
+    -fx-text-fill: -text-dark;
+}
+.login-brand {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -blue;
+}
+.login-heading {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -text-dark;
+    -fx-padding: 16 0 0 0;
+}
+.login-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: -text-dark;
+}
+.login-field {
+    -fx-background-color: -white;
+    -fx-border-color: -border;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 9 12 9 12;
+    -fx-pref-width: 320;
+}
+.login-field:focused {
+    -fx-border-color: -blue;
+}
+.login-link {
+    -fx-text-fill: -blue;
+    -fx-font-size: 11px;
+}
+.login-button {
+    -fx-background-color: -navy;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 20;
+    -fx-padding: 10 44 10 44;
+    -fx-cursor: hand;
+}
+.login-button:hover {
+    -fx-background-color: -navy-dark;
+}
+.login-error {
+    -fx-text-fill: -red;
+    -fx-font-size: 11px;
+}
+.login-caption {
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-opacity: 0.85;
+}

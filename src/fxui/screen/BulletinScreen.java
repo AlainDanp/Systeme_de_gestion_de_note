@@ -45,14 +45,15 @@ public class BulletinScreen {
 
     public Parent build() {
         Label titre = new Label("Gestion des Bulletins");
-        titre.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        titre.getStyleClass().add("screen-title");
 
         Button retour = new Button("Retour");
+        retour.getStyleClass().add("btn-outline");
         retour.setOnAction(e -> onBack.run());
 
         HBox header = new HBox(20, retour, titre);
         header.setAlignment(Pos.CENTER_LEFT);
-        header.setPadding(new Insets(10));
+        header.getStyleClass().add("screen-header");
 
         configurerColonnes();
 
@@ -72,18 +73,23 @@ public class BulletinScreen {
         rafraichir();
 
         Button generer = new Button("Générer");
+        generer.getStyleClass().addAll("btn", "btn-success");
         generer.setOnAction(e -> genererBulletin());
 
         Button creerManuel = new Button("Créer manuel");
+        creerManuel.getStyleClass().addAll("btn", "btn-info");
         creerManuel.setOnAction(e -> creerManuel());
 
         Button modifier = new Button("Modifier");
+        modifier.getStyleClass().addAll("btn", "btn-warning");
         modifier.setOnAction(e -> avecSelection(this::modifier));
 
         Button supprimer = new Button("Supprimer");
+        supprimer.getStyleClass().addAll("btn", "btn-danger");
         supprimer.setOnAction(e -> avecSelection(this::supprimer));
 
         Button voirDetail = new Button("Voir détail des notes");
+        voirDetail.getStyleClass().addAll("btn", "btn-primary");
         voirDetail.setOnAction(e -> avecSelection(this::voirDetail));
 
         HBox actions = new HBox(10, generer, creerManuel, modifier, supprimer, voirDetail);
@@ -118,6 +124,7 @@ public class BulletinScreen {
 
     private void rafraichir() {
         table.setItems(FXCollections.observableArrayList(bulletinService.listerTousLesBulletins()));
+        table.refresh();
     }
 
     private Integer lireEtudiantId() {
@@ -134,6 +141,7 @@ public class BulletinScreen {
         if (id == null) return;
         try {
             table.setItems(FXCollections.observableArrayList(bulletinService.listerParEtudiant(id)));
+            table.refresh();
         } catch (IllegalArgumentException ex) {
             ScreenUtils.showError(ex.getMessage());
         }
@@ -174,6 +182,7 @@ public class BulletinScreen {
             Integer etudiantId = Integer.parseInt(etudiantIdField.getText().trim());
             Bulletin bulletin = bulletinService.genererEtEnregistrerBulletin(etudiantId, periodeField.getText().trim());
             table.setItems(FXCollections.observableArrayList(bulletinService.listerParEtudiant(etudiantId)));
+            table.refresh();
             ScreenUtils.infoAlert("Bulletin généré : moyenne = "
                     + (bulletin.getMoyenne() == null ? "-" : bulletin.getMoyenne())
                     + ", moyenne classe = "
@@ -224,6 +233,7 @@ public class BulletinScreen {
 
             bulletinService.creeBulletin(bulletin);
             table.setItems(FXCollections.observableArrayList(bulletinService.listerParEtudiant(etudiantId)));
+            table.refresh();
         } catch (NumberFormatException ex) {
             ScreenUtils.showError("ID étudiant et moyennes doivent être numériques.");
         } catch (IllegalArgumentException ex) {

@@ -24,7 +24,8 @@ public class Navigator {
 
     public void show(Parent root, String title) {
         if (scene == null) {
-            scene = new Scene(root, 900, 600);
+            scene = new Scene(root, 1000, 650);
+            scene.getStylesheets().add(getClass().getResource("/fxui/theme.css").toExternalForm());
             primaryStage.setScene(scene);
         } else {
             scene.setRoot(root);

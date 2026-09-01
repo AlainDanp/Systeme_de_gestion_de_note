@@ -3,24 +3,24 @@ package fxui.screen;
 import MVC.User;
 import core.AppContext;
 import fxui.Navigator;
+import fxui.Sidebar;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Parent;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.Tooltip;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
-/**
- * Tableau de bord Administrateur. Remplace Admin.vue.MenuAdminView.afficher() côté console.
- * Seule la gestion des matières est câblée pour l'instant (voir MatiereScreen) ; les autres
- * domaines restent des boutons désactivés en attendant leur migration JavaFX.
- */
+import java.util.List;
+
+/** Tableau de bord Administrateur : sidebar persistante + contenu central (refonte Figma). */
 public class AdminDashboardScreen {
 
     private final AppContext appContext;
     private final Navigator navigator;
     private final User admin;
+    private final StackPane content = new StackPane();
+    private Sidebar sidebar;
 
     public AdminDashboardScreen(AppContext appContext, Navigator navigator, User admin) {
         this.appContext = appContext;
@@ -29,68 +29,59 @@ public class AdminDashboardScreen {
     }
 
     public Parent build() {
-        Label titre = new Label("Bienvenue, " + admin.getNomComplet() + " (Administrateur)");
-        titre.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        content.getStyleClass().add("content-card");
 
-        Button matieres = new Button("Gestion des Matières");
-        matieres.setOnAction(e -> navigator.show(
-                new MatiereScreen(appContext.getMatiereService(), navigator, this::retour).build(),
-                "Gestion des Matières"));
+        List<Sidebar.Entry> entries = List.of(
+                new Sidebar.Entry("🧑‍🏫", "Gestion des\nEnseignants", () ->
+                        new EnseignantScreen(appContext.getEnseignantService(), appContext.getDataSource(),
+                                this::showOverview).build()),
+                new Sidebar.Entry("🎓", "Gestion des\nÉtudiants", () ->
+                        new EtudiantScreen(appContext.getEtudiantService(), appContext.getClasseService(),
+                                appContext.getDataSource(), this::showOverview).build()),
+                new Sidebar.Entry("🏫", "Gestion des\nClasses", () ->
+                        new ClasseScreen(appContext.getClasseService(), appContext.getDataSource(),
+                                this::showOverview).build()),
+                new Sidebar.Entry("📘", "Gestion des\nMatières", () ->
+                        new MatiereScreen(appContext.getMatiereService(), navigator, this::showOverview).build()),
+                new Sidebar.Entry("📝", "Gestion des\nNotes", () ->
+                        new NoteScreen(appContext.getNoteService(), appContext.getDataSource(),
+                                this::showOverview).build()),
+                new Sidebar.Entry("📊", "Gestion des\nBulletins", () ->
+                        new BulletinScreen(appContext.getBulletinService(), appContext.getDataSource(),
+                                this::showOverview).build()),
+                new Sidebar.Entry("👤", "Mon Profil", () ->
+                        new ProfilScreen(appContext.getAuthenticationService(), this::showOverview).build())
+        );
 
-        Button enseignants = new Button("Gestion des Enseignants");
-        enseignants.setOnAction(e -> navigator.show(
-                new EnseignantScreen(appContext.getEnseignantService(), appContext.getDataSource(), this::retour).build(),
-                "Gestion des Enseignants"));
+        sidebar = new Sidebar(entries,
+                () -> setContent(new NotificationScreen(appContext.getNotificationListener(), admin.getId(),
+                        this::showOverview).build()),
+                () -> {
+                    appContext.getAuthenticationService().logout();
+                    navigator.showLogin();
+                },
+                this::setContent);
 
-        Button etudiants = new Button("Gestion des Étudiants");
-        etudiants.setOnAction(e -> navigator.show(
-                new EtudiantScreen(appContext.getEtudiantService(), appContext.getClasseService(),
-                        appContext.getDataSource(), this::retour).build(),
-                "Gestion des Étudiants"));
+        showOverview();
 
-        Button classes = new Button("Gestion des Classes");
-        classes.setOnAction(e -> navigator.show(
-                new ClasseScreen(appContext.getClasseService(), appContext.getDataSource(), this::retour).build(),
-                "Gestion des Classes"));
-
-        Button notes = new Button("Gestion des Notes");
-        notes.setOnAction(e -> navigator.show(
-                new NoteScreen(appContext.getNoteService(), appContext.getDataSource(), this::retour).build(),
-                "Gestion des Notes"));
-
-        Button bulletins = new Button("Gestion des Bulletins");
-        bulletins.setOnAction(e -> navigator.show(
-                new BulletinScreen(appContext.getBulletinService(), appContext.getDataSource(), this::retour).build(),
-                "Gestion des Bulletins"));
-
-        Button notifications = boutonAVenir("Notifications");
-
-        Button profil = new Button("Mon Profil");
-        profil.setOnAction(e -> navigator.show(
-                new ProfilScreen(appContext.getAuthenticationService(), this::retour).build(),
-                "Mon Profil"));
-
-        Button deconnexion = new Button("Déconnexion");
-        deconnexion.setOnAction(e -> {
-            appContext.getAuthenticationService().logout();
-            navigator.showLogin();
-        });
-
-        VBox root = new VBox(10, titre, enseignants, etudiants, classes, matieres, notes, bulletins,
-                notifications, profil, deconnexion);
-        root.setAlignment(Pos.CENTER);
-        root.setPadding(new Insets(30));
+        BorderPane root = new BorderPane();
+        root.getStyleClass().add("content-shell");
+        root.setLeft(sidebar.getNode());
+        root.setCenter(content);
         return root;
     }
 
-    private void retour() {
-        navigator.show(build(), "Tableau de bord - Administrateur");
+    private void setContent(Parent node) {
+        content.getChildren().setAll(node);
     }
 
-    private Button boutonAVenir(String texte) {
-        Button bouton = new Button(texte);
-        bouton.setDisable(true);
-        bouton.setTooltip(new Tooltip("À venir"));
-        return bouton;
+    private void showOverview() {
+        sidebar.clearSelection();
+        Label titre = new Label("Bienvenue, " + admin.getNomComplet());
+        titre.getStyleClass().add("screen-title");
+        Label sousTitre = new Label("Administrateur — utilisez le menu à gauche pour gérer l'établissement.");
+        VBox box = new VBox(10, titre, sousTitre);
+        box.setPadding(new Insets(20));
+        setContent(box);
     }
 }

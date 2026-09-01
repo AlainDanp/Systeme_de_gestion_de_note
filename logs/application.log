@@ -26,3 +26,42 @@
 [2026-08-29 21:38:02] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=2b89c83c-1143-476f-8961-10b981f523a2
 [2026-08-29 21:45:22] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=3a464e7e-13a7-4acd-88f1-ae1a61ba8ac6
 [2026-08-29 21:50:09] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=20e4b9fd-ffcb-4495-b675-b64f75dce23e
+[2026-08-29 21:54:00] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=8b74adac-6e00-461c-b93b-a686564f1769
+[2026-08-29 22:00:59] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=9e26693f-4242-42ae-8aab-d39cd641f714
+[2026-08-29 22:05:00] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=da01ca2e-5109-4154-8c14-90a0abff67d9
+[2026-08-29 22:20:22] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=5c8ccecf-0c8b-4ca3-90fc-a145ccf60077
+[2026-08-29 22:22:32] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=21b18f25-af44-43b8-a9c4-127219cb322a
+[2026-08-29 22:22:56] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=a5daf1ba-1a10-413b-86e0-7d0b16f49670
+[2026-08-29 22:26:20] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=8c5247fe-1528-457c-bcea-636bf4cd03df
+[2026-08-29 22:29:04] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=4c26bb1f-46b1-40c8-b4ff-c6c782d15377
+[2026-08-29 22:33:49] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=04d5be88-d7de-41e9-8cf6-87e48350c4f6
+[2026-08-29 22:34:18] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=76c4571d-63dd-4fed-bd23-9ef3a9a92829
+[2026-08-29 22:37:49] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=7baa1a0d-389e-4823-9a9b-446ee4b21d77
+[2026-08-29 22:37:56] [USER_LOGIN] User=Morelle Dong (5) | Connexion réussie - Rôle: Enseignant | EventID=aa4f0801-9d9b-433a-8e7e-855a77439024
+[2026-08-29 22:38:21] [USER_LOGOUT] User=Morelle Dong (5) | Déconnexion | EventID=41eccb17-1527-4b16-8cc3-34395a67b582
+[2026-08-29 22:38:33] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=2b3c2cc9-0b6f-4ee3-b2da-992b3025876c
+[2026-08-29 22:39:41] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=a202c369-21bd-47e1-a2e3-0d5e291631ad
+[2026-08-29 22:39:48] [USER_LOGIN] User=Marc Lefebvre (3) | Connexion réussie - Rôle: Enseignant | EventID=3e6b700b-11c6-4f6b-b77b-058cf30cfbc6
+[2026-08-29 22:39:58] [USER_LOGOUT] User=Marc Lefebvre (3) | Déconnexion | EventID=a0f8efa7-0d9c-4608-839a-2b11b14a1e5b
+[2026-08-29 22:40:08] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=22387f0e-ee6c-47ae-88af-e2d8b717b48d
+[2026-08-29 22:40:22] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=5140de24-ca90-4d17-b732-b08e32d0e540
+[2026-08-29 22:48:04] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=2b8de56a-ffe7-4bc4-9f27-49f3cb21898c
+[2026-08-29 22:49:31] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=83da1f95-d1b2-4336-8cd4-c08e9410da7b
+[2026-08-29 22:50:09] [USER_LOGIN] User=Pierre Durand (1) | Connexion réussie - Rôle: Enseignant | EventID=cbe4bd27-2b6f-4c32-bd5b-b381e0aad79a
+[2026-08-29 22:53:02] [USER_LOGOUT] User=Pierre Durand (1) | Déconnexion | EventID=74c7f46b-2af8-4fa8-a3f4-9e194591e845
+[2026-08-29 22:53:25] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=383162b3-8a89-457e-bb02-da6a97686c99
+[2026-08-29 22:54:19] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=b98854a5-741d-4fb2-a21c-9dd0368dc985
+[2026-08-29 22:54:22] [USER_LOGIN] User=Jean Dupont (1) | Connexion réussie - Rôle: Étudiant | EventID=88072647-04bb-4309-a41a-66b0bf2f5f65
+[2026-08-29 23:39:08] [USER_LOGIN] User=Marc Lefebvre (3) | Connexion réussie - Rôle: Enseignant | EventID=961d99d0-dca4-4d12-9895-a734951250c8
+[2026-08-29 23:39:44] [USER_LOGOUT] User=Marc Lefebvre (3) | Déconnexion | EventID=b8b166c2-7652-4b7e-ad08-e93497467604
+[2026-08-30 00:26:12] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=32c1ac07-17d4-4d72-9e7e-cf40170e6039
+[2026-08-30 00:27:12] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=51b64c65-0314-4450-9dad-08bb0af3401b
+[2026-08-30 00:27:20] [USER_LOGIN] User=Marc Lefebvre (3) | Connexion réussie - Rôle: Enseignant | EventID=9cb69469-96cf-47a6-9ac8-1e0f694dc3ed
+[2026-08-30 00:27:35] [USER_LOGOUT] User=Marc Lefebvre (3) | Déconnexion | EventID=5bf8b3f6-291d-4f7e-8d6b-64e1d8fa3514
+[2026-08-31 09:39:20] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=dc4d13b2-60fa-4565-bf5d-15780223529a
+[2026-08-31 09:39:37] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=e14c4436-db10-41ff-8fb7-ed21183dec14
+[2026-09-01 15:37:39] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=9e8f5563-da20-4d54-af96-545e4eb192e9
+[2026-09-01 16:11:58] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=7228053a-b607-4344-b1f2-58ced7b29896
+[2026-09-01 16:37:12] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=0538799e-0ed9-427c-8f33-1684051e1a0a
+[2026-09-01 16:37:25] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=7014c50b-2075-40b4-96f8-0365cf085274
+[2026-09-01 16:37:46] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=b923af2e-29ee-4774-b1a5-096f4ccd85f3

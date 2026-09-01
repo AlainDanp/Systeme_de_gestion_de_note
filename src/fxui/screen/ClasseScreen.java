@@ -42,31 +42,37 @@ public class ClasseScreen {
 
     public Parent build() {
         Label titre = new Label("Gestion des Classes");
-        titre.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        titre.getStyleClass().add("screen-title");
 
         Button retour = new Button("Retour");
+        retour.getStyleClass().add("btn-outline");
         retour.setOnAction(e -> onBack.run());
 
         HBox header = new HBox(20, retour, titre);
         header.setAlignment(Pos.CENTER_LEFT);
-        header.setPadding(new Insets(10));
+        header.getStyleClass().add("screen-header");
 
         configurerColonnes();
         rafraichir();
 
         Button nouvelle = new Button("Nouvelle classe");
+        nouvelle.getStyleClass().addAll("btn", "btn-success");
         nouvelle.setOnAction(e -> ouvrirFormulaire(null));
 
         Button modifier = new Button("Modifier");
+        modifier.getStyleClass().addAll("btn", "btn-warning");
         modifier.setOnAction(e -> avecSelection(this::ouvrirFormulaire));
 
         Button supprimer = new Button("Supprimer");
+        supprimer.getStyleClass().addAll("btn", "btn-danger");
         supprimer.setOnAction(e -> avecSelection(this::supprimer));
 
         Button rafraichirEffectif = new Button("Rafraîchir nb élèves");
+        rafraichirEffectif.getStyleClass().addAll("btn", "btn-info");
         rafraichirEffectif.setOnAction(e -> avecSelection(this::rafraichirEffectif));
 
         Button actualiser = new Button("Actualiser");
+        actualiser.getStyleClass().addAll("btn", "btn-primary");
         actualiser.setOnAction(e -> rafraichir());
 
         HBox actions = new HBox(10, nouvelle, modifier, supprimer, rafraichirEffectif, actualiser);
@@ -88,7 +94,7 @@ public class ClasseScreen {
         TableColumn<Classe, Number> colEffectif = new TableColumn<>("Nombre d'élèves");
         colEffectif.setCellValueFactory(cell ->
                 new javafx.beans.property.SimpleIntegerProperty(
-                        cell.getValue().getNombreEleves() == null ? 0 : cell.getValue().getNombreEleves()));
+                        classeService.compterEtudiants(cell.getValue().getIdClasse())));
         colEffectif.setPrefWidth(300);
 
         table.getColumns().setAll(List.of(colNiveau, colEffectif));
@@ -97,6 +103,7 @@ public class ClasseScreen {
     private void rafraichir() {
         ObservableList<Classe> data = FXCollections.observableArrayList(classeService.listerToutesLesClasses());
         table.setItems(data);
+        table.refresh();
     }
 
     private void avecSelection(java.util.function.Consumer<Classe> action) {

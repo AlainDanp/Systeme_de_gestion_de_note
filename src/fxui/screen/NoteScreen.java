@@ -48,14 +48,15 @@ public class NoteScreen {
 
     public Parent build() {
         Label titre = new Label("Gestion des Notes");
-        titre.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        titre.getStyleClass().add("screen-title");
 
         Button retour = new Button("Retour");
+        retour.getStyleClass().add("btn-outline");
         retour.setOnAction(e -> onBack.run());
 
         HBox header = new HBox(20, retour, titre);
         header.setAlignment(Pos.CENTER_LEFT);
-        header.setPadding(new Insets(10));
+        header.getStyleClass().add("screen-header");
 
         configurerColonnes();
         filtreEtudiantId.setPromptText("ID étudiant");
@@ -101,12 +102,15 @@ public class NoteScreen {
         rafraichir();
 
         Button nouvelle = new Button("Nouvelle note");
+        nouvelle.getStyleClass().addAll("btn", "btn-success");
         nouvelle.setOnAction(e -> ouvrirFormulaire(null));
 
         Button modifier = new Button("Modifier");
+        modifier.getStyleClass().addAll("btn", "btn-warning");
         modifier.setOnAction(e -> avecSelection(this::ouvrirFormulaire));
 
         Button supprimer = new Button("Supprimer");
+        supprimer.getStyleClass().addAll("btn", "btn-danger");
         supprimer.setOnAction(e -> avecSelection(this::supprimer));
 
         HBox actions = new HBox(10, nouvelle, modifier, supprimer);
@@ -144,6 +148,7 @@ public class NoteScreen {
 
     private void rafraichir() {
         table.setItems(FXCollections.observableArrayList(noteService.listerToutesLesNotes()));
+        table.refresh();
     }
 
     private Integer lireEtudiantId() {
@@ -160,6 +165,7 @@ public class NoteScreen {
         if (id == null) return;
         try {
             table.setItems(FXCollections.observableArrayList(noteService.listerNotesParEtudiant(id)));
+            table.refresh();
         } catch (IllegalArgumentException ex) {
             ScreenUtils.showError(ex.getMessage());
         }
@@ -171,6 +177,7 @@ public class NoteScreen {
         try {
             table.setItems(FXCollections.observableArrayList(
                     noteService.listerNotesParEtudiantEtPeriode(id, filtrePeriode.getText().trim())));
+            table.refresh();
         } catch (IllegalArgumentException ex) {
             ScreenUtils.showError(ex.getMessage());
         }
@@ -180,6 +187,7 @@ public class NoteScreen {
         try {
             table.setItems(FXCollections.observableArrayList(
                     noteService.listerNotesParPeriode(filtrePeriode.getText().trim())));
+            table.refresh();
         } catch (IllegalArgumentException ex) {
             ScreenUtils.showError(ex.getMessage());
         }
@@ -193,6 +201,7 @@ public class NoteScreen {
         }
         try {
             table.setItems(FXCollections.observableArrayList(noteService.listerNotesParMatiere(matiere)));
+            table.refresh();
         } catch (IllegalArgumentException ex) {
             ScreenUtils.showError(ex.getMessage());
         }
