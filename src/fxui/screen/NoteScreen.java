@@ -1,16 +1,19 @@
 package fxui.screen;
 
+import fxui.EtudiantPicker;
 import fxui.ScreenUtils;
+import gestion_Etudiant.model.Etudiant;
+import gestion_Etudiant.service.EtudiantService;
 import gestion_Note.model.Note;
 import gestion_Note.service.NoteService;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -33,18 +36,21 @@ import java.util.Optional;
 public class NoteScreen {
 
     private final NoteService noteService;
+    private final EtudiantService etudiantService;
     private final DataSource dataSource;
     private final Runnable onBack;
     private final TableView<Note> table = new TableView<>();
 
-    private final TextField filtreEtudiantId = new TextField();
+    private final ComboBox<Etudiant> filtreEtudiant;
     private final TextField filtrePeriode = new TextField();
     private final ChoiceBox<String> filtreMatiere = new ChoiceBox<>();
 
-    public NoteScreen(NoteService noteService, DataSource dataSource, Runnable onBack) {
+    public NoteScreen(NoteService noteService, EtudiantService etudiantService, DataSource dataSource, Runnable onBack) {
         this.noteService = noteService;
+        this.etudiantService = etudiantService;
         this.dataSource = dataSource;
         this.onBack = onBack;
+        this.filtreEtudiant = EtudiantPicker.build(etudiantService.listerTousLesEtudiants());
     }
 
     public Parent build() {
@@ -60,8 +66,6 @@ public class NoteScreen {
         header.getStyleClass().add("screen-header");
 
         configurerColonnes();
-        filtreEtudiantId.setPromptText("ID étudiant");
-        filtreEtudiantId.setPrefWidth(90);
         filtrePeriode.setPromptText("Période (YYYY-T1)");
         filtrePeriode.setPrefWidth(130);
         filtreMatiere.setItems(FXCollections.observableArrayList(noteService.listerMatieres()));
@@ -92,7 +96,7 @@ public class NoteScreen {
         toutes.setOnAction(e -> rafraichir());
 
         FlowPane filtres = new FlowPane(12, 10,
-                ScreenUtils.filterGroup("ID étudiant", filtreEtudiantId, rechercherEtudiant),
+                ScreenUtils.filterGroup("Étudiant", filtreEtudiant, rechercherEtudiant),
                 ScreenUtils.filterGroup("Période", filtrePeriode, rechercherPeriode),
                 ScreenUtils.filterGroup("Matière", filtreMatiere, rechercherMatiere),
                 etudiantEtPeriode, moyenne, toutes);
@@ -152,17 +156,17 @@ public class NoteScreen {
         table.refresh();
     }
 
-    private Integer lireEtudiantId() {
-        try {
-            return Integer.parseInt(filtreEtudiantId.getText().trim());
-        } catch (NumberFormatException ex) {
-            ScreenUtils.showError("L'ID étudiant doit être un entier.");
+    private Integer etudiantSelectionne() {
+        Etudiant etudiant = filtreEtudiant.getValue();
+        if (etudiant == null) {
+            ScreenUtils.showError("Sélectionnez un étudiant dans la liste (recherche par nom/prénom).");
             return null;
         }
+        return etudiant.getIdEtudiant();
     }
 
     private void filtrerParEtudiant() {
-        Integer id = lireEtudiantId();
+        Integer id = etudiantSelectionne();
         if (id == null) return;
         try {
             table.setItems(FXCollections.observableArrayList(noteService.listerNotesParEtudiant(id)));
@@ -173,7 +177,7 @@ public class NoteScreen {
     }
 
     private void filtrerParEtudiantEtPeriode() {
-        Integer id = lireEtudiantId();
+        Integer id = etudiantSelectionne();
         if (id == null) return;
         try {
             table.setItems(FXCollections.observableArrayList(
@@ -209,7 +213,7 @@ public class NoteScreen {
     }
 
     private void calculerMoyenne() {
-        Integer id = lireEtudiantId();
+        Integer id = etudiantSelectionne();
         if (id == null) return;
         try {
             Double moyenne = noteService.calculerMoyenneEtudiant(id, filtrePeriode.getText().trim());
@@ -252,8 +256,15 @@ public class NoteScreen {
         dialog.setTitle(edition ? "Modifier la note" : "Nouvelle note");
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
-        TextField etudiantIdField = new TextField(edition ? String.valueOf(existante.getEtudiantId()) : "");
-        etudiantIdField.setDisable(edition);
+        ComboBox<Etudiant> etudiantChoice = EtudiantPicker.build(etudiantService.listerTousLesEtudiants());
+        if (edition) {
+            etudiantChoice.getItems().stream()
+                    .filter(et -> et.getIdEtudiant().equals(existante.getEtudiantId()))
+                    .findFirst()
+                    .ifPresent(etudiantChoice::setValue);
+            etudiantChoice.setDisable(true);
+        }
+
         TextField periodeField = new TextField(edition ? existante.getPeriode() : "");
         periodeField.setPromptText("YYYY-T1 ou YYYY-S1");
         ChoiceBox<String> matiereChoice = new ChoiceBox<>(FXCollections.observableArrayList(noteService.listerMatieres()));
@@ -264,7 +275,7 @@ public class NoteScreen {
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(20));
-        grid.addRow(0, new Label("ID étudiant :"), etudiantIdField);
+        grid.addRow(0, new Label("Étudiant :"), etudiantChoice);
         grid.addRow(1, new Label("Période :"), periodeField);
         grid.addRow(2, new Label("Matière :"), matiereChoice);
         grid.addRow(3, new Label("Valeur (/20) :"), valeurField);
@@ -276,13 +287,17 @@ public class NoteScreen {
             return;
         }
 
-        Integer etudiantId;
+        Etudiant etudiant = etudiantChoice.getValue();
+        if (etudiant == null) {
+            ScreenUtils.showError("Sélectionnez un étudiant dans la liste.");
+            return;
+        }
+
         Double valeur;
         try {
-            etudiantId = edition ? existante.getEtudiantId() : Integer.parseInt(etudiantIdField.getText().trim());
             valeur = Double.parseDouble(valeurField.getText().trim().replace(',', '.'));
         } catch (NumberFormatException ex) {
-            ScreenUtils.showError("ID étudiant et valeur doivent être numériques.");
+            ScreenUtils.showError("La valeur doit être numérique.");
             return;
         }
 
@@ -293,7 +308,7 @@ public class NoteScreen {
                 existante.setValeur(valeur);
                 noteService.modifierNote(existante);
             } else {
-                Note nouvelle = new Note(null, etudiantId, periodeField.getText(), matiereChoice.getValue(), valeur, null);
+                Note nouvelle = new Note(null, etudiant.getIdEtudiant(), periodeField.getText(), matiereChoice.getValue(), valeur, null);
                 noteService.creeNote(nouvelle);
             }
             rafraichir();

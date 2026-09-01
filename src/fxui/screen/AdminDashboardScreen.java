@@ -45,11 +45,11 @@ public class AdminDashboardScreen {
                 new Sidebar.Entry("📘", "Gestion des\nMatières", () ->
                         new MatiereScreen(appContext.getMatiereService(), navigator, this::showOverview).build()),
                 new Sidebar.Entry("📝", "Gestion des\nNotes", () ->
-                        new NoteScreen(appContext.getNoteService(), appContext.getDataSource(),
-                                this::showOverview).build()),
+                        new NoteScreen(appContext.getNoteService(), appContext.getEtudiantService(),
+                                appContext.getDataSource(), this::showOverview).build()),
                 new Sidebar.Entry("📊", "Gestion des\nBulletins", () ->
-                        new BulletinScreen(appContext.getBulletinService(), appContext.getDataSource(),
-                                this::showOverview).build()),
+                        new BulletinScreen(appContext.getBulletinService(), appContext.getEtudiantService(),
+                                appContext.getDataSource(), this::showOverview).build()),
                 new Sidebar.Entry("👤", "Mon Profil", () ->
                         new ProfilScreen(appContext.getAuthenticationService(), this::showOverview).build())
         );

@@ -1,4 +1,4 @@
-package fxui.screen;
+ kpackage fxui.screen;
 
 import fxui.ScreenUtils;
 import gestion_Classe.model.Classe;

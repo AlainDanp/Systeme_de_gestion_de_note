@@ -1,16 +1,20 @@
 package fxui.screen;
 
+import fxui.BulletinPdfExporter;
+import fxui.EtudiantPicker;
 import fxui.ScreenUtils;
 import gestion_Bulletin.model.Bulletin;
 import gestion_Bulletin.model.NoteDetail;
 import gestion_Bulletin.service.BulletinService;
+import gestion_Etudiant.model.Etudiant;
+import gestion_Etudiant.service.EtudiantService;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.print.PrinterJob;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -22,8 +26,11 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 
 import javax.sql.DataSource;
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -34,15 +41,19 @@ import java.util.function.Consumer;
 public class BulletinScreen {
 
     private final BulletinService bulletinService;
+    private final EtudiantService etudiantService;
     private final DataSource dataSource;
     private final Runnable onBack;
     private final TableView<Bulletin> table = new TableView<>();
-    private final TextField filtreEtudiantId = new TextField();
+    private final ComboBox<Etudiant> filtreEtudiant;
 
-    public BulletinScreen(BulletinService bulletinService, DataSource dataSource, Runnable onBack) {
+    public BulletinScreen(BulletinService bulletinService, EtudiantService etudiantService,
+                           DataSource dataSource, Runnable onBack) {
         this.bulletinService = bulletinService;
+        this.etudiantService = etudiantService;
         this.dataSource = dataSource;
         this.onBack = onBack;
+        this.filtreEtudiant = EtudiantPicker.build(etudiantService.listerTousLesEtudiants());
     }
 
     public Parent build() {
@@ -59,8 +70,6 @@ public class BulletinScreen {
 
         configurerColonnes();
 
-        filtreEtudiantId.setPromptText("ID étudiant");
-        filtreEtudiantId.setPrefWidth(100);
         Button rechercher = new Button("Rechercher");
         rechercher.getStyleClass().add("btn-outline");
         rechercher.setOnAction(e -> listerParEtudiant());
@@ -69,7 +78,7 @@ public class BulletinScreen {
         toutes.setOnAction(e -> rafraichir());
 
         FlowPane filtres = new FlowPane(12, 10,
-                ScreenUtils.filterGroup("ID étudiant", filtreEtudiantId, rechercher), toutes);
+                ScreenUtils.filterGroup("Étudiant", filtreEtudiant, rechercher), toutes);
         filtres.getStyleClass().add("filter-bar");
 
         VBox top = new VBox(header, filtres);
@@ -96,11 +105,11 @@ public class BulletinScreen {
         voirDetail.getStyleClass().addAll("btn", "btn-primary");
         voirDetail.setOnAction(e -> avecSelection(this::voirDetail));
 
-        Button imprimer = new Button("🖶 Imprimer / Exporter PDF");
-        imprimer.getStyleClass().addAll("btn", "btn-secondary");
-        imprimer.setOnAction(e -> imprimer());
+        Button exportPdf = new Button("🖶 Exporter en PDF");
+        exportPdf.getStyleClass().addAll("btn", "btn-secondary");
+        exportPdf.setOnAction(e -> avecSelection(this::exporterPdf));
 
-        FlowPane actions = new FlowPane(10, 10, generer, creerManuel, modifier, supprimer, voirDetail, imprimer);
+        FlowPane actions = new FlowPane(10, 10, generer, creerManuel, modifier, supprimer, voirDetail, exportPdf);
         actions.setAlignment(Pos.CENTER);
         actions.getStyleClass().add("action-bar");
 
@@ -135,20 +144,14 @@ public class BulletinScreen {
         table.refresh();
     }
 
-    private Integer lireEtudiantId() {
-        try {
-            return Integer.parseInt(filtreEtudiantId.getText().trim());
-        } catch (NumberFormatException ex) {
-            ScreenUtils.showError("L'ID étudiant doit être un entier.");
-            return null;
-        }
-    }
-
     private void listerParEtudiant() {
-        Integer id = lireEtudiantId();
-        if (id == null) return;
+        Etudiant etudiant = filtreEtudiant.getValue();
+        if (etudiant == null) {
+            ScreenUtils.showError("Sélectionnez un étudiant dans la liste (recherche par nom/prénom).");
+            return;
+        }
         try {
-            table.setItems(FXCollections.observableArrayList(bulletinService.listerParEtudiant(id)));
+            table.setItems(FXCollections.observableArrayList(bulletinService.listerParEtudiant(etudiant.getIdEtudiant())));
             table.refresh();
         } catch (IllegalArgumentException ex) {
             ScreenUtils.showError(ex.getMessage());
@@ -165,7 +168,7 @@ public class BulletinScreen {
     }
 
     private void genererBulletin() {
-        TextField etudiantIdField = new TextField();
+        ComboBox<Etudiant> etudiantChoice = EtudiantPicker.build(etudiantService.listerTousLesEtudiants());
         TextField periodeField = new TextField();
         periodeField.setPromptText("YYYY-T1 ou YYYY-S1");
 
@@ -173,7 +176,7 @@ public class BulletinScreen {
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(20));
-        grid.addRow(0, new Label("ID étudiant :"), etudiantIdField);
+        grid.addRow(0, new Label("Étudiant :"), etudiantChoice);
         grid.addRow(1, new Label("Période :"), periodeField);
 
         Dialog<ButtonType> dialog = new Dialog<>();
@@ -186,8 +189,14 @@ public class BulletinScreen {
             return;
         }
 
+        Etudiant etudiant = etudiantChoice.getValue();
+        if (etudiant == null) {
+            ScreenUtils.showError("Sélectionnez un étudiant dans la liste.");
+            return;
+        }
+
         try {
-            Integer etudiantId = Integer.parseInt(etudiantIdField.getText().trim());
+            Integer etudiantId = etudiant.getIdEtudiant();
             Bulletin bulletin = bulletinService.genererEtEnregistrerBulletin(etudiantId, periodeField.getText().trim());
             table.setItems(FXCollections.observableArrayList(bulletinService.listerParEtudiant(etudiantId)));
             table.refresh();
@@ -195,15 +204,13 @@ public class BulletinScreen {
                     + (bulletin.getMoyenne() == null ? "-" : bulletin.getMoyenne())
                     + ", moyenne classe = "
                     + (bulletin.getMoyennDelaClasse() == null ? "-" : bulletin.getMoyennDelaClasse()));
-        } catch (NumberFormatException ex) {
-            ScreenUtils.showError("L'ID étudiant doit être un entier.");
         } catch (IllegalArgumentException ex) {
             ScreenUtils.showError(ex.getMessage());
         }
     }
 
     private void creerManuel() {
-        TextField etudiantIdField = new TextField();
+        ComboBox<Etudiant> etudiantChoice = EtudiantPicker.build(etudiantService.listerTousLesEtudiants());
         TextField periodeField = new TextField();
         periodeField.setPromptText("YYYY-T1 ou YYYY-S1");
         TextField moyenneField = new TextField();
@@ -213,7 +220,7 @@ public class BulletinScreen {
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(20));
-        grid.addRow(0, new Label("ID étudiant :"), etudiantIdField);
+        grid.addRow(0, new Label("Étudiant :"), etudiantChoice);
         grid.addRow(1, new Label("Période :"), periodeField);
         grid.addRow(2, new Label("Moyenne :"), moyenneField);
         grid.addRow(3, new Label("Moyenne classe :"), moyenneClasseField);
@@ -228,8 +235,14 @@ public class BulletinScreen {
             return;
         }
 
+        Etudiant etudiant = etudiantChoice.getValue();
+        if (etudiant == null) {
+            ScreenUtils.showError("Sélectionnez un étudiant dans la liste.");
+            return;
+        }
+
         try {
-            Integer etudiantId = Integer.parseInt(etudiantIdField.getText().trim());
+            Integer etudiantId = etudiant.getIdEtudiant();
             Double moyenne = moyenneField.getText().isBlank() ? null : Double.parseDouble(moyenneField.getText().trim().replace(',', '.'));
             Double moyenneClasse = moyenneClasseField.getText().isBlank() ? null : Double.parseDouble(moyenneClasseField.getText().trim().replace(',', '.'));
 
@@ -243,7 +256,7 @@ public class BulletinScreen {
             table.setItems(FXCollections.observableArrayList(bulletinService.listerParEtudiant(etudiantId)));
             table.refresh();
         } catch (NumberFormatException ex) {
-            ScreenUtils.showError("ID étudiant et moyennes doivent être numériques.");
+            ScreenUtils.showError("Les moyennes doivent être numériques.");
         } catch (IllegalArgumentException ex) {
             ScreenUtils.showError(ex.getMessage());
         }
@@ -274,7 +287,7 @@ public class BulletinScreen {
             bulletin.setMoyenne(moyenneField.getText().isBlank() ? null : Double.parseDouble(moyenneField.getText().trim().replace(',', '.')));
             bulletin.setMoyennDelaClasse(moyenneClasseField.getText().isBlank() ? null : Double.parseDouble(moyenneClasseField.getText().trim().replace(',', '.')));
             bulletinService.update(bulletin);
-            listerParEtudiant();
+            rafraichir();
         } catch (NumberFormatException ex) {
             ScreenUtils.showError("Les moyennes doivent être numériques.");
         } catch (IllegalArgumentException ex) {
@@ -297,24 +310,26 @@ public class BulletinScreen {
         }
     }
 
-    /**
-     * Impression du tableau via l'imprimante système. Sur Windows, choisir "Microsoft Print to PDF"
-     * dans la boîte de dialogue permet d'exporter directement en PDF (export PDF natif à revoir plus tard).
-     */
-    private void imprimer() {
-        PrinterJob job = PrinterJob.createPrinterJob();
-        if (job == null) {
-            ScreenUtils.showError("Aucune imprimante disponible sur ce poste.");
+    /** Génère le PDF du bulletin sélectionné, selon le gabarit fixe de {@link BulletinPdfExporter}. */
+    private void exporterPdf(Bulletin bulletin) {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Exporter le bulletin en PDF");
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Fichier PDF", "*.pdf"));
+        String nomFichier = ("bulletin_" + bulletin.getEtudiantNomComplet() + "_" + bulletin.getPeriode())
+                .replaceAll("[^a-zA-Z0-9À-ÿ_-]", "_") + ".pdf";
+        chooser.setInitialFileName(nomFichier);
+
+        File fichier = chooser.showSaveDialog(table.getScene().getWindow());
+        if (fichier == null) {
             return;
         }
-        if (!job.showPrintDialog(table.getScene().getWindow())) {
-            return;
-        }
-        boolean succes = job.printPage(table);
-        if (succes) {
-            job.endJob();
-        } else {
-            ScreenUtils.showError("Échec de l'impression.");
+
+        try {
+            List<NoteDetail> notes = bulletinService.getNotesAvecEnseignants(bulletin.getEtudiantId(), bulletin.getPeriode());
+            BulletinPdfExporter.export(fichier, bulletin, notes);
+            ScreenUtils.infoAlert("Bulletin exporté : " + fichier.getAbsolutePath());
+        } catch (IOException ex) {
+            ScreenUtils.showError("Échec de l'export PDF : " + ex.getMessage());
         }
     }
 

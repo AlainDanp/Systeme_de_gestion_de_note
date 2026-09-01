@@ -10,7 +10,9 @@ fxui\JavaFxApp.class
 fxui\Sidebar.class
 gestion_Bulletin\service\BulletinServiceImpl.class
 core\AppContext.class
+fxui\EtudiantPicker.class
 Event\NoteUpdatedEvent.class
+fxui\EtudiantPicker$1.class
 gestion_Matiere\service\EnseignantInfo.class
 Event\EnseignantCreatedEvent.class
 gestion_Etudiant\service\EtudiantServiceImpl.class
@@ -29,6 +31,7 @@ BD\DataSourceProvider$1.class
 fxui\Navigator.class
 Event\listener\FileLoggerListener.class
 Admin\model\Admin.class
+fxui\BulletinPdfExporter.class
 Event\UserLoginEvent.class
 Event\Event.class
 gestion_Matiere\service\MatiereServiceImpl.class
