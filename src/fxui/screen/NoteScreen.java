@@ -18,6 +18,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -67,35 +68,35 @@ public class NoteScreen {
         filtreMatiere.setPrefWidth(150);
 
         Button rechercherEtudiant = new Button("Rechercher");
+        rechercherEtudiant.getStyleClass().add("btn-outline");
         rechercherEtudiant.setOnAction(e -> filtrerParEtudiant());
-        HBox ligneEtudiant = new HBox(8, new Label("Filtrer par étudiant :"), filtreEtudiantId, rechercherEtudiant);
-        ligneEtudiant.setAlignment(Pos.CENTER_LEFT);
 
         Button rechercherPeriode = new Button("Rechercher");
+        rechercherPeriode.getStyleClass().add("btn-outline");
         rechercherPeriode.setOnAction(e -> filtrerParPeriode());
-        HBox lignePeriode = new HBox(8, new Label("Filtrer par période :"), filtrePeriode, rechercherPeriode);
-        lignePeriode.setAlignment(Pos.CENTER_LEFT);
 
         Button rechercherMatiere = new Button("Rechercher");
+        rechercherMatiere.getStyleClass().add("btn-outline");
         rechercherMatiere.setOnAction(e -> filtrerParMatiere());
-        HBox ligneMatiere = new HBox(8, new Label("Filtrer par matière :"), filtreMatiere, rechercherMatiere);
-        ligneMatiere.setAlignment(Pos.CENTER_LEFT);
 
-        Button rechercherEtudiantPeriode = new Button("Rechercher");
-        rechercherEtudiantPeriode.setOnAction(e -> filtrerParEtudiantEtPeriode());
+        Button etudiantEtPeriode = new Button("Étudiant + période");
+        etudiantEtPeriode.getStyleClass().addAll("btn", "btn-outline");
+        etudiantEtPeriode.setOnAction(e -> filtrerParEtudiantEtPeriode());
+
         Button moyenne = new Button("Calculer moyenne");
+        moyenne.getStyleClass().addAll("btn", "btn-info");
         moyenne.setOnAction(e -> calculerMoyenne());
-        HBox ligneCombinee = new HBox(8, new Label("Étudiant + période (mêmes champs ci-dessus) :"),
-                rechercherEtudiantPeriode, moyenne);
-        ligneCombinee.setAlignment(Pos.CENTER_LEFT);
 
         Button toutes = new Button("Toutes les notes");
+        toutes.getStyleClass().addAll("btn", "btn-primary");
         toutes.setOnAction(e -> rafraichir());
-        HBox ligneToutes = new HBox(8, toutes);
-        ligneToutes.setAlignment(Pos.CENTER_LEFT);
 
-        VBox filtres = new VBox(6, ligneEtudiant, lignePeriode, ligneMatiere, ligneCombinee, ligneToutes);
-        filtres.setPadding(new Insets(0, 10, 10, 10));
+        FlowPane filtres = new FlowPane(12, 10,
+                ScreenUtils.filterGroup("ID étudiant", filtreEtudiantId, rechercherEtudiant),
+                ScreenUtils.filterGroup("Période", filtrePeriode, rechercherPeriode),
+                ScreenUtils.filterGroup("Matière", filtreMatiere, rechercherMatiere),
+                etudiantEtPeriode, moyenne, toutes);
+        filtres.getStyleClass().add("filter-bar");
 
         VBox top = new VBox(header, filtres);
 
@@ -113,9 +114,9 @@ public class NoteScreen {
         supprimer.getStyleClass().addAll("btn", "btn-danger");
         supprimer.setOnAction(e -> avecSelection(this::supprimer));
 
-        HBox actions = new HBox(10, nouvelle, modifier, supprimer);
+        FlowPane actions = new FlowPane(10, 10, nouvelle, modifier, supprimer);
         actions.setAlignment(Pos.CENTER);
-        actions.setPadding(new Insets(10));
+        actions.getStyleClass().add("action-bar");
 
         BorderPane root = new BorderPane();
         root.setTop(top);

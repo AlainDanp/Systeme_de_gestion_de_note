@@ -139,6 +139,35 @@ public class EnseignantServiceImpl  implements EnseignantService{
         return newPassword;
     }
 
+    @Override
+    public List<String> listerClassesConcernees(Integer idEnseignant) {
+        if (idEnseignant == null) {
+            return new java.util.ArrayList<>();
+        }
+        String sql =
+                "SELECT DISTINCT cl.niveau " +
+                        "FROM classe cl " +
+                        "JOIN etudiant et ON et.classe_id = cl.id_classe " +
+                        "JOIN note n ON n.id_etudiant = et.id " +
+                        "JOIN matiere m ON m.nom = n.nom_matiere " +
+                        "WHERE m.id_enseignant = ? " +
+                        "ORDER BY cl.niveau";
+
+        List<String> classes = new java.util.ArrayList<>();
+        try (Connection c = ds.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, idEnseignant);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    classes.add(rs.getString("niveau"));
+                }
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException("Erreur lors de la récupération des classes concernées", ex);
+        }
+        return classes;
+    }
+
     private void validerEnseignant(Enseignant enseignant) {
         if (enseignant.getNom() == null || enseignant.getNom().isBlank()) {
             throw new IllegalArgumentException("Le nom est requis");

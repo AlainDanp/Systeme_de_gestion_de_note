@@ -157,6 +157,34 @@ public class MatiereServiceImpl implements MatiereService {
     }
 
 
+    @Override
+    public List<String> listerClassesConcernees(String nomMatiere) {
+        if (nomMatiere == null || nomMatiere.isBlank()) {
+            return new ArrayList<>();
+        }
+        String sql =
+                "SELECT DISTINCT cl.niveau " +
+                        "FROM classe cl " +
+                        "JOIN etudiant et ON et.classe_id = cl.id_classe " +
+                        "JOIN note n ON n.id_etudiant = et.id " +
+                        "WHERE n.nom_matiere = ? " +
+                        "ORDER BY cl.niveau";
+
+        List<String> classes = new ArrayList<>();
+        try (Connection c = ds.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setString(1, nomMatiere);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    classes.add(rs.getString("niveau"));
+                }
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException("Erreur lors de la récupération des classes concernées", ex);
+        }
+        return classes;
+    }
+
     private void validerMatiere(Matiere matiere) {
         if (matiere.getNom() == null || matiere.getNom().isBlank()) {
             throw new IllegalArgumentException("Le nom de la matière est requis");

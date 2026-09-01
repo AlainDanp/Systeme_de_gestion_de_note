@@ -1,7 +1,12 @@
 package fxui;
 
+import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
 
 import java.util.Optional;
 
@@ -9,6 +14,23 @@ import java.util.Optional;
 public final class ScreenUtils {
 
     private ScreenUtils() {}
+
+    /** Un "chip" de filtre (étiquette + champ + bouton), utilisé dans les barres de filtres. */
+    public static HBox filterGroup(String label, Node field, Button action) {
+        HBox group = filterGroup(label, field);
+        group.getChildren().add(action);
+        return group;
+    }
+
+    /** Variante sans bouton (ex. simple champ de recherche). */
+    public static HBox filterGroup(String label, Node field) {
+        Label lbl = new Label(label);
+        lbl.getStyleClass().add("filter-group-label");
+        HBox group = new HBox(6, lbl, field);
+        group.getStyleClass().add("filter-group");
+        group.setAlignment(Pos.CENTER_LEFT);
+        return group;
+    }
 
     public static void showError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR, message, ButtonType.OK);

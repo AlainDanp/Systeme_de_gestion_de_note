@@ -15,4 +15,6 @@ public interface MatiereService {
     int compterNotesMatiere(String nomMatiere);
     boolean matiereExiste(String nom);
     List<EnseignantInfo> listerEnseignantsDisponibles();
+    /** Classes ayant au moins un élève noté dans cette matière (dérivé des notes, pas de lien direct en base). */
+    List<String> listerClassesConcernees(String nomMatiere);
 }

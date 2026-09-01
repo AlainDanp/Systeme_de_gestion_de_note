@@ -5,6 +5,7 @@ import core.AppContext;
 import fxui.Navigator;
 import fxui.Sidebar;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
@@ -73,9 +74,11 @@ public class EnseignantDashboardScreen {
     private void showOverview() {
         sidebar.clearSelection();
         Label titre = new Label("Bienvenue, " + enseignant.getNomComplet());
-        titre.getStyleClass().add("screen-title");
+        titre.getStyleClass().add("overview-title");
         Label sousTitre = new Label("Enseignant — utilisez le menu à gauche pour gérer vos notes et bulletins.");
-        VBox box = new VBox(10, titre, sousTitre);
+        sousTitre.getStyleClass().add("overview-subtitle");
+        VBox box = new VBox(14, titre, sousTitre);
+        box.setAlignment(Pos.CENTER);
         box.setPadding(new Insets(20));
         setContent(box);
     }

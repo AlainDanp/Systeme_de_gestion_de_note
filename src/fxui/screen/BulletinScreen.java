@@ -7,6 +7,7 @@ import gestion_Bulletin.service.BulletinService;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.print.PrinterJob;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -17,6 +18,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -60,13 +62,15 @@ public class BulletinScreen {
         filtreEtudiantId.setPromptText("ID étudiant");
         filtreEtudiantId.setPrefWidth(100);
         Button rechercher = new Button("Rechercher");
+        rechercher.getStyleClass().add("btn-outline");
         rechercher.setOnAction(e -> listerParEtudiant());
         Button toutes = new Button("Tous les bulletins");
+        toutes.getStyleClass().addAll("btn", "btn-primary");
         toutes.setOnAction(e -> rafraichir());
 
-        HBox filtres = new HBox(8, new Label("Filtrer par étudiant :"), filtreEtudiantId, rechercher, toutes);
-        filtres.setAlignment(Pos.CENTER_LEFT);
-        filtres.setPadding(new Insets(0, 10, 10, 10));
+        FlowPane filtres = new FlowPane(12, 10,
+                ScreenUtils.filterGroup("ID étudiant", filtreEtudiantId, rechercher), toutes);
+        filtres.getStyleClass().add("filter-bar");
 
         VBox top = new VBox(header, filtres);
 
@@ -92,9 +96,13 @@ public class BulletinScreen {
         voirDetail.getStyleClass().addAll("btn", "btn-primary");
         voirDetail.setOnAction(e -> avecSelection(this::voirDetail));
 
-        HBox actions = new HBox(10, generer, creerManuel, modifier, supprimer, voirDetail);
+        Button imprimer = new Button("🖶 Imprimer / Exporter PDF");
+        imprimer.getStyleClass().addAll("btn", "btn-secondary");
+        imprimer.setOnAction(e -> imprimer());
+
+        FlowPane actions = new FlowPane(10, 10, generer, creerManuel, modifier, supprimer, voirDetail, imprimer);
         actions.setAlignment(Pos.CENTER);
-        actions.setPadding(new Insets(10));
+        actions.getStyleClass().add("action-bar");
 
         BorderPane root = new BorderPane();
         root.setTop(top);
@@ -286,6 +294,27 @@ public class BulletinScreen {
             ScreenUtils.showError("Erreur de connexion : " + ex.getMessage());
         } catch (IllegalArgumentException ex) {
             ScreenUtils.showError(ex.getMessage());
+        }
+    }
+
+    /**
+     * Impression du tableau via l'imprimante système. Sur Windows, choisir "Microsoft Print to PDF"
+     * dans la boîte de dialogue permet d'exporter directement en PDF (export PDF natif à revoir plus tard).
+     */
+    private void imprimer() {
+        PrinterJob job = PrinterJob.createPrinterJob();
+        if (job == null) {
+            ScreenUtils.showError("Aucune imprimante disponible sur ce poste.");
+            return;
+        }
+        if (!job.showPrintDialog(table.getScene().getWindow())) {
+            return;
+        }
+        boolean succes = job.printPage(table);
+        if (succes) {
+            job.endJob();
+        } else {
+            ScreenUtils.showError("Échec de l'impression.");
         }
     }
 

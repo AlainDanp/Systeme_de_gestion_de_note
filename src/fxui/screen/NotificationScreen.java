@@ -103,9 +103,9 @@ public class NotificationScreen {
         actualiser.getStyleClass().addAll("btn", "btn-primary");
         actualiser.setOnAction(e -> rafraichir());
 
-        HBox actions = new HBox(10, toutes, nonLues, marquerLues, effacer, actualiser);
+        javafx.scene.layout.FlowPane actions = new javafx.scene.layout.FlowPane(10, 10, toutes, nonLues, marquerLues, effacer, actualiser);
         actions.setAlignment(Pos.CENTER);
-        actions.setPadding(new Insets(10));
+        actions.getStyleClass().add("action-bar");
 
         rafraichir();
 

@@ -22,6 +22,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -84,9 +85,9 @@ public class MatiereScreen {
         actualiser.getStyleClass().addAll("btn", "btn-primary");
         actualiser.setOnAction(e -> rafraichir());
 
-        HBox actions = new HBox(10, nouvelle, modifier, supprimer, actualiser);
+        FlowPane actions = new FlowPane(10, 10, nouvelle, modifier, supprimer, actualiser);
         actions.setAlignment(Pos.CENTER);
-        actions.setPadding(new Insets(10));
+        actions.getStyleClass().add("action-bar");
 
         BorderPane root = new BorderPane();
         root.setTop(header);
@@ -105,7 +106,12 @@ public class MatiereScreen {
                 new javafx.beans.property.SimpleStringProperty(cell.getValue().getEnseignantNomComplet()));
         colEnseignant.setPrefWidth(300);
 
-        table.getColumns().setAll(List.of(colNom, colEnseignant));
+        TableColumn<Matiere, String> colClasses = new TableColumn<>("Classes");
+        colClasses.setCellValueFactory(cell -> new javafx.beans.property.SimpleStringProperty(
+                String.join(", ", matiereService.listerClassesConcernees(cell.getValue().getNom()))));
+        colClasses.setPrefWidth(250);
+
+        table.getColumns().setAll(List.of(colNom, colEnseignant, colClasses));
     }
 
     private void rafraichir() {

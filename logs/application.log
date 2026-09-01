@@ -65,3 +65,8 @@
 [2026-09-01 16:37:12] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=0538799e-0ed9-427c-8f33-1684051e1a0a
 [2026-09-01 16:37:25] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=7014c50b-2075-40b4-96f8-0365cf085274
 [2026-09-01 16:37:46] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=b923af2e-29ee-4774-b1a5-096f4ccd85f3
+[2026-09-01 16:41:07] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=ffa36bfc-5641-4a10-9e89-7de1747daddd
+[2026-09-01 16:53:57] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=e06902ab-7342-4838-86eb-95ce36aa70ac
+[2026-09-01 16:55:10] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=6d091b8e-a7c6-41b3-834d-3965d637117b
+[2026-09-01 16:56:00] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=34cb8b56-84ec-437b-bef0-d4b7bfa1abe1
+[2026-09-01 16:57:07] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=32294f94-54f9-4d3c-9137-36d9109a02c7

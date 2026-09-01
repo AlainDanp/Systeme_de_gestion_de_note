@@ -41,6 +41,40 @@
     -fx-padding: 14 20 14 20;
 }
 
+.overview-title {
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -text-dark;
+    -fx-text-alignment: center;
+}
+.overview-subtitle {
+    -fx-font-size: 15px;
+    -fx-text-fill: -text-muted;
+    -fx-text-alignment: center;
+}
+
+/* ===== Barre de filtres ===== */
+.filter-bar {
+    -fx-background-color: derive(-bg-content, 25%);
+    -fx-background-radius: 8;
+    -fx-padding: 12;
+}
+.filter-group {
+    -fx-background-color: -white;
+    -fx-background-radius: 6;
+    -fx-border-color: -border;
+    -fx-border-radius: 6;
+    -fx-padding: 6 10 6 10;
+}
+.filter-group-label {
+    -fx-font-size: 11px;
+    -fx-text-fill: -text-muted;
+    -fx-font-weight: bold;
+}
+.action-bar {
+    -fx-padding: 14;
+}
+
 .content-shell {
     -fx-background-color: -bg-app;
 }
@@ -114,6 +148,8 @@
 .btn-outline:hover {
     -fx-background-color: derive(-bg-content, 20%);
 }
+.btn-secondary { -fx-background-color: #5A6B7B; }
+.btn-secondary:hover { -fx-background-color: #465563; }
 
 /* ===== TableView ===== */
 .table-view {

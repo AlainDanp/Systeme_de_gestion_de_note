@@ -15,4 +15,6 @@ public interface EnseignantService {
     List<Enseignant> listerTousLesEnseignants();
     void toggleActif(Integer id);
     String resetPassword(Integer id);
+    /** Classes ayant au moins un élève noté par cet enseignant (dérivé des notes, pas de lien direct en base). */
+    List<String> listerClassesConcernees(Integer idEnseignant);
 }

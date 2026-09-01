@@ -21,6 +21,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -71,13 +72,15 @@ public class EtudiantScreen {
         filtreClasse.setConverter(classeConverter());
         filtreClasse.setPrefWidth(150);
         Button rechercherClasse = new Button("Rechercher");
+        rechercherClasse.getStyleClass().add("btn-outline");
         rechercherClasse.setOnAction(e -> filtrerParClasse());
         Button toutes = new Button("Tous les étudiants");
+        toutes.getStyleClass().addAll("btn", "btn-primary");
         toutes.setOnAction(e -> rafraichir());
 
-        HBox filtres = new HBox(8, new Label("Filtrer par classe :"), filtreClasse, rechercherClasse, toutes);
-        filtres.setAlignment(Pos.CENTER_LEFT);
-        filtres.setPadding(new Insets(0, 10, 10, 10));
+        FlowPane filtres = new FlowPane(12, 10,
+                ScreenUtils.filterGroup("Classe", filtreClasse, rechercherClasse), toutes);
+        filtres.getStyleClass().add("filter-bar");
 
         VBox top = new VBox(header, filtres);
 
@@ -101,9 +104,9 @@ public class EtudiantScreen {
         resetPassword.getStyleClass().addAll("btn", "btn-maroon");
         resetPassword.setOnAction(e -> avecSelection(this::resetPassword));
 
-        HBox actions = new HBox(10, nouveau, modifier, supprimer, toggleActif, resetPassword);
+        FlowPane actions = new FlowPane(10, 10, nouveau, modifier, supprimer, toggleActif, resetPassword);
         actions.setAlignment(Pos.CENTER);
-        actions.setPadding(new Insets(10));
+        actions.getStyleClass().add("action-bar");
 
         BorderPane root = new BorderPane();
         root.setTop(top);

@@ -17,6 +17,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 
@@ -75,9 +76,9 @@ public class ClasseScreen {
         actualiser.getStyleClass().addAll("btn", "btn-primary");
         actualiser.setOnAction(e -> rafraichir());
 
-        HBox actions = new HBox(10, nouvelle, modifier, supprimer, rafraichirEffectif, actualiser);
+        FlowPane actions = new FlowPane(10, 10, nouvelle, modifier, supprimer, rafraichirEffectif, actualiser);
         actions.setAlignment(Pos.CENTER);
-        actions.setPadding(new Insets(10));
+        actions.getStyleClass().add("action-bar");
 
         BorderPane root = new BorderPane();
         root.setTop(header);
