@@ -163,11 +163,11 @@ public class MatiereServiceImpl implements MatiereService {
             return new ArrayList<>();
         }
         String sql =
-                "SELECT DISTINCT cl.niveau " +
+                "SELECT cl.niveau " +
                         "FROM classe cl " +
-                        "JOIN etudiant et ON et.classe_id = cl.id_classe " +
-                        "JOIN note n ON n.id_etudiant = et.id " +
-                        "WHERE n.nom_matiere = ? " +
+                        "JOIN enseignant_classe ec ON ec.id_classe = cl.id_classe " +
+                        "JOIN matiere m ON m.id_enseignant = ec.id_enseignant " +
+                        "WHERE m.nom = ? " +
                         "ORDER BY cl.niveau";
 
         List<String> classes = new ArrayList<>();

@@ -75,3 +75,45 @@
 [2026-09-01 17:07:16] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=145fc3d0-4871-4e00-a5ee-8f51c8440735
 [2026-09-01 17:12:16] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=c155bd79-2a1f-4cfc-a35c-d4d6fe2919f5
 [2026-09-01 17:13:17] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=d38024f4-a831-4d31-924b-2fdce7d58f16
+[2026-09-01 17:15:17] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=5389eb13-96d4-42ff-999c-70300cdd3174
+[2026-09-01 17:16:48] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=a4875554-5f09-4072-af99-7111c7c8a12a
+[2026-09-01 17:17:19] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=117b587c-f47a-474c-9508-88909e68be01
+[2026-09-01 17:20:37] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=9570949e-98b9-4e20-9b00-80c6e9b6d9a6
+[2026-09-01 17:20:49] [USER_LOGIN] User=Paul Alain (6) | Connexion réussie - Rôle: Étudiant | EventID=e6f67b23-2861-4b35-95a3-c16f074d517c
+[2026-09-01 17:21:05] [USER_LOGOUT] User=Paul Alain (6) | Déconnexion | EventID=d47b8663-1932-4d69-819c-5d5400a53e6e
+[2026-09-01 17:21:29] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=58bd0534-5e49-4710-9d61-fc45fdd8a577
+[2026-09-01 17:21:46] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=aa82bc6f-78d9-47f0-b011-7271cabad7d8
+[2026-09-01 17:21:59] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=5a5e6dcc-3950-4866-a291-4b79f5fb288d
+[2026-09-01 17:22:45] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=e3e491d3-e49d-410e-98fd-759658e82784
+[2026-09-01 17:22:57] [USER_LOGIN] User=michael lordis (7) | Connexion réussie - Rôle: Enseignant | EventID=38664bff-75a1-48e0-8a16-3d9426835bc6
+[2026-09-01 17:36:38] [USER_LOGOUT] User=michael lordis (7) | Déconnexion | EventID=3abd6f12-2015-45d6-848a-ebd19efaf066
+[2026-09-01 17:44:48] [USER_LOGIN] User=michael lordis (7) | Connexion réussie - Rôle: Enseignant | EventID=3dc9d231-becd-4e3c-b791-209311e9388d
+[2026-09-01 17:45:13] [USER_LOGOUT] User=michael lordis (7) | Déconnexion | EventID=76ef43d8-4940-4e1a-81a9-751dd73125d3
+[2026-09-01 17:45:19] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=103e96d4-2d1a-463c-9d94-eb520afa250f
+[2026-09-01 17:47:38] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=c9d8b79c-55c6-49e0-85bd-ae915de02728
+[2026-09-01 17:47:46] [USER_LOGIN] User=michael lordis (7) | Connexion réussie - Rôle: Titulaire | EventID=86f01a78-6043-4a66-a376-90f104b7b25c
+[2026-09-01 17:48:01] [USER_LOGOUT] User=michael lordis (7) | Déconnexion | EventID=0f77862d-48d0-46a4-aa45-cb3c68b14073
+[2026-09-01 17:50:36] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=bc38a7fa-f797-4ef4-9f78-7ccf6da8f9c8
+[2026-09-01 17:51:32] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=a62336c5-8380-4836-bbe7-d5b611a3cf05
+[2026-09-01 17:52:33] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=de7cabaf-a312-4fc3-8760-6f936ef11371
+[2026-09-01 17:52:38] [USER_LOGIN] User=michael lordis (7) | Connexion réussie - Rôle: Titulaire | EventID=5a9a25fd-40fd-4127-80a0-24cfcd759839
+[2026-09-01 17:53:12] [USER_LOGOUT] User=michael lordis (7) | Déconnexion | EventID=2f49c7e0-662e-4bca-80d8-43a29b87497f
+[2026-09-01 18:20:09] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=29ca3062-f09b-4dd5-b0b4-3ea2bc9213cc
+[2026-09-01 18:20:41] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=f4cd3c2a-559c-4efd-afec-22eec277d5e8
+[2026-09-01 18:20:49] [USER_LOGIN] User=michael lordis (7) | Connexion réussie - Rôle: Titulaire | EventID=29fb5b1e-1a25-4a4b-ada1-aa516dcc7d54
+[2026-09-01 18:21:12] [USER_LOGOUT] User=michael lordis (7) | Déconnexion | EventID=b9ecf476-1c44-4515-b456-468a6e56170c
+[2026-09-01 18:21:19] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=4a94be16-ef23-4413-a553-9df58a66789a
+[2026-09-01 18:21:30] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=9fb0c29b-91ff-4850-85bc-7abbd8e32e3b
+[2026-09-01 18:21:46] [USER_LOGIN] User=michael lordis (7) | Connexion réussie - Rôle: Enseignant | EventID=8aabb4e8-2a67-4a70-a404-f245a42d65d3
+[2026-09-01 18:22:00] [USER_LOGOUT] User=michael lordis (7) | Déconnexion | EventID=77094c14-1768-4658-90a7-99aa2fde3dd9
+[2026-09-01 18:22:54] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=3a590488-d578-4fd1-9bb8-88dcd49a0b5f
+[2026-09-01 18:27:00] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=83563fa6-5a2c-49cf-a2d2-3133c2c3cd91
+[2026-09-01 18:27:09] [USER_LOGIN] User=michael lordis (7) | Connexion réussie - Rôle: Enseignant | EventID=07f52243-4a4e-43f4-8081-d928cb9d6834
+[2026-09-01 18:28:25] [USER_LOGOUT] User=michael lordis (7) | Déconnexion | EventID=e45c7726-78c9-4071-81a1-9f5db32b4b80
+[2026-09-01 18:28:34] [USER_LOGIN] User=Paul Alain (6) | Connexion réussie - Rôle: Étudiant | EventID=6dfde0dc-874c-4afb-ad5d-bcb7d789087b
+[2026-09-01 18:28:50] [USER_LOGOUT] User=Paul Alain (6) | Déconnexion | EventID=8c5a376c-42dc-42f8-aad1-7418e992b964
+[2026-09-01 18:30:08] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=8b33eaa2-fbe7-4437-90e5-cced72c75f64
+[2026-09-01 18:32:32] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=f3cd616d-bf45-4dbb-a4c0-fd31040315ea
+[2026-09-01 18:32:42] [USER_LOGIN] User=tso tso Daniella (8) | Connexion réussie - Rôle: Enseignant | EventID=50b294d0-f5c6-49c7-a56e-6acbc51d59c0
+[2026-09-01 18:33:39] [USER_LOGOUT] User=tso tso Daniella (8) | Déconnexion | EventID=cd2b6384-2707-4edd-a1d7-5075105e8359
+[2026-09-01 18:33:45] [USER_LOGIN] User=Paul Alain (6) | Connexion réussie - Rôle: Étudiant | EventID=c24cb06f-6aeb-4918-9fee-3938d0520535

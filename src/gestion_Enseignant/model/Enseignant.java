@@ -10,6 +10,7 @@ public class Enseignant extends User {
     private OffsetDateTime createdAt;
 
     private String matiereNom;
+    private boolean titulaire;
 
     public Enseignant() {}
 
@@ -20,9 +21,18 @@ public class Enseignant extends User {
         setEmail(email);
     }
 
+    /** Un enseignant Titulaire a les mêmes droits qu'un Enseignant, plus la gestion des bulletins. */
     @Override
     public Role getRole() {
-        return Role.ENSEIGNANT;
+        return titulaire ? Role.TITULAIRE : Role.ENSEIGNANT;
+    }
+
+    public boolean isTitulaire() {
+        return titulaire;
+    }
+
+    public void setTitulaire(boolean titulaire) {
+        this.titulaire = titulaire;
     }
 
     @Override

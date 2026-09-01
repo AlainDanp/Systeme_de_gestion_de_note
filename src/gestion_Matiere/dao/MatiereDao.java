@@ -20,7 +20,9 @@ public class MatiereDao {
      * Créer une nouvelle matière
      */
     public Matiere save(Matiere matiere) {
-        String sql = "INSERT INTO Matiere (nom, id_enseignant) VALUES (?, ?)";
+        // "coefficient" est NOT NULL en base mais n'est pas encore modélisé côté Java ;
+        // on l'insère à 1 par défaut pour ne pas violer la contrainte (sinon la création échoue toujours).
+        String sql = "INSERT INTO Matiere (nom, coefficient, id_enseignant) VALUES (?, 1, ?)";
         try (Connection c = ds.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, matiere.getNom());

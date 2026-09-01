@@ -2,6 +2,7 @@ package gestion_Bulletin.service;
 
 import Event.BulletinGeneratedEvent;
 import Event.EventDispatcher;
+import MVC.Role;
 import MVC.SecurityContext;
 import gestion_Bulletin.dao.BulletinDao;
 import gestion_Bulletin.model.Bulletin;
@@ -37,11 +38,13 @@ public class BulletinServiceImpl implements BulletinService {
 
     @Override
     public Bulletin genererEtEnregistrerBulletin(Integer etudiantId, String periode) {
+        securityContext.exigerDroitBulletin();
         if (etudiantId == null) throw new IllegalArgumentException("etudiantId requis");
         if (periode == null || periode.isBlank()) throw new IllegalArgumentException("periode requise");
         if (!periode.matches("\\d{4}-(S|T|s|t)\\d+")) {
             throw new IllegalArgumentException("Format de période invalide. Attendu : YYYY-S1 ou YYYY-T1");
         }
+        exigerAccesClasseEleve(etudiantId);
 
         // Requête SQL optimisée avec id_etudiant
         final String sql =
@@ -132,12 +135,18 @@ public class BulletinServiceImpl implements BulletinService {
 
         @Override
         public void update(Bulletin bulletin) {
+            securityContext.exigerDroitBulletin();
+            exigerAccesClasseEleve(bulletin.getEtudiantId());
             bulletinDao.update(bulletin);
         }
 
 
         @Override
         public void delete(Connection c,Integer id) {
+            securityContext.exigerDroitBulletin();
+            Bulletin existant = bulletinDao.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Bulletin introuvable : " + id));
+            exigerAccesClasseEleve(existant.getEtudiantId());
             bulletinDao.delete(c,id);
         }
 
@@ -145,7 +154,9 @@ public class BulletinServiceImpl implements BulletinService {
 
         @Override
         public Bulletin creeBulletin(Bulletin bulletin) {
+            securityContext.exigerDroitBulletin();
             validerBulletin(bulletin);
+            exigerAccesClasseEleve(bulletin.getEtudiantId());
 
             try (Connection c = ds.getConnection()) {
                 c.setAutoCommit(false);
@@ -225,6 +236,34 @@ public class BulletinServiceImpl implements BulletinService {
         private Double round2(double v) {
             return Math.round(v * 100.0) / 100.0;
         }
+
+    /** Un Titulaire ne peut gérer que les bulletins des élèves d'une de ses classes assignées. */
+    private void exigerAccesClasseEleve(Integer etudiantId) {
+        if (securityContext.getRole() != Role.TITULAIRE) {
+            return;
+        }
+        Integer classeId = classeIdEtudiant(etudiantId);
+        if (!securityContext.aClasseAssignee(classeId)) {
+            throw new SecurityException("Cet élève n'appartient à aucune de vos classes assignées.");
+        }
+    }
+
+    private Integer classeIdEtudiant(Integer etudiantId) {
+        String sql = "SELECT classe_id FROM etudiant WHERE id = ?";
+        try (Connection c = ds.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, etudiantId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    int classeId = rs.getInt("classe_id");
+                    return rs.wasNull() ? null : classeId;
+                }
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException("Erreur lors de la récupération de la classe de l'étudiant", ex);
+        }
+        return null;
+    }
 
     private void validerBulletin(Bulletin bulletin) {
         if (bulletin.getIdEtudiant() == null) {

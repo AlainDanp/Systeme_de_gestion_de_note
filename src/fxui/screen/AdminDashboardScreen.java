@@ -34,8 +34,8 @@ public class AdminDashboardScreen {
 
         List<Sidebar.Entry> entries = List.of(
                 new Sidebar.Entry("🧑‍🏫", "Gestion des\nEnseignants", () ->
-                        new EnseignantScreen(appContext.getEnseignantService(), appContext.getDataSource(),
-                                this::showOverview).build()),
+                        new EnseignantScreen(appContext.getEnseignantService(), appContext.getClasseService(),
+                                appContext.getDataSource(), this::showOverview).build()),
                 new Sidebar.Entry("🎓", "Gestion des\nÉtudiants", () ->
                         new EtudiantScreen(appContext.getEtudiantService(), appContext.getClasseService(),
                                 appContext.getDataSource(), this::showOverview).build()),

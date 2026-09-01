@@ -174,7 +174,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         if (currentUser.getRole() == Role.ADMIN) {
             adminDao.updatePassword(currentUser.getId(), newHash);
-        } else if (currentUser.getRole() == Role.ENSEIGNANT) {
+        } else if (currentUser instanceof Enseignant) {
             enseignantDao.updatePassword(currentUser.getId(), newHash);
         } else if (currentUser.getRole() == Role.ETUDIANT) {
             etudiantDao.updatePassword(currentUser.getId(), newHash);

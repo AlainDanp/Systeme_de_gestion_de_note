@@ -126,6 +126,17 @@ public class EnseignantServiceImpl  implements EnseignantService{
     }
 
     @Override
+    public void toggleTitulaire(Integer id) {
+        Optional<Enseignant> opt = enseignantDao.findById(id);
+        if (opt.isEmpty()) {
+            throw new IllegalArgumentException("Enseignant introuvable");
+        }
+
+        Enseignant e = opt.get();
+        enseignantDao.updateTitulaire(id, !e.isTitulaire());
+    }
+
+    @Override
     public String resetPassword(Integer id) {
         if (id == null) {
             throw new IllegalArgumentException("L'ID est requis");
@@ -145,12 +156,10 @@ public class EnseignantServiceImpl  implements EnseignantService{
             return new java.util.ArrayList<>();
         }
         String sql =
-                "SELECT DISTINCT cl.niveau " +
+                "SELECT cl.niveau " +
                         "FROM classe cl " +
-                        "JOIN etudiant et ON et.classe_id = cl.id_classe " +
-                        "JOIN note n ON n.id_etudiant = et.id " +
-                        "JOIN matiere m ON m.nom = n.nom_matiere " +
-                        "WHERE m.id_enseignant = ? " +
+                        "JOIN enseignant_classe ec ON ec.id_classe = cl.id_classe " +
+                        "WHERE ec.id_enseignant = ? " +
                         "ORDER BY cl.niveau";
 
         List<String> classes = new java.util.ArrayList<>();
@@ -163,9 +172,25 @@ public class EnseignantServiceImpl  implements EnseignantService{
                 }
             }
         } catch (SQLException ex) {
-            throw new RuntimeException("Erreur lors de la récupération des classes concernées", ex);
+            throw new RuntimeException("Erreur lors de la récupération des classes assignées", ex);
         }
         return classes;
+    }
+
+    @Override
+    public List<Integer> listerClasseIds(Integer idEnseignant) {
+        if (idEnseignant == null) {
+            throw new IllegalArgumentException("L'ID de l'enseignant est requis");
+        }
+        return enseignantDao.findClasseIds(idEnseignant);
+    }
+
+    @Override
+    public void assignerClasses(Integer idEnseignant, List<Integer> classeIds) {
+        if (idEnseignant == null) {
+            throw new IllegalArgumentException("L'ID de l'enseignant est requis");
+        }
+        enseignantDao.assignerClasses(idEnseignant, classeIds == null ? List.of() : classeIds);
     }
 
     private void validerEnseignant(Enseignant enseignant) {

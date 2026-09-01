@@ -1,6 +1,8 @@
 package fxui.screen;
 
 import fxui.ScreenUtils;
+import gestion_Classe.model.Classe;
+import gestion_Classe.service.ClasseService;
 import gestion_Enseignant.model.Enseignant;
 import gestion_Enseignant.service.EnseignantService;
 import javafx.collections.FXCollections;
@@ -12,7 +14,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -28,17 +33,21 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /** Écran CRUD "Enseignant". Remplace gestion_Enseignant.vue.EnseignantView.menu(). */
 public class EnseignantScreen {
 
     private final EnseignantService enseignantService;
+    private final ClasseService classeService;
     private final DataSource dataSource;
     private final Runnable onBack;
     private final TableView<Enseignant> table = new TableView<>();
 
-    public EnseignantScreen(EnseignantService enseignantService, DataSource dataSource, Runnable onBack) {
+    public EnseignantScreen(EnseignantService enseignantService, ClasseService classeService,
+                             DataSource dataSource, Runnable onBack) {
         this.enseignantService = enseignantService;
+        this.classeService = classeService;
         this.dataSource = dataSource;
         this.onBack = onBack;
     }
@@ -78,11 +87,16 @@ public class EnseignantScreen {
         resetPassword.getStyleClass().addAll("btn", "btn-maroon");
         resetPassword.setOnAction(e -> avecSelection(this::resetPassword));
 
+        Button toggleTitulaire = new Button("Titulaire ↔");
+        toggleTitulaire.getStyleClass().addAll("btn", "btn-secondary");
+        toggleTitulaire.setOnAction(e -> avecSelection(this::toggleTitulaire));
+
         Button actualiser = new Button("Actualiser");
         actualiser.getStyleClass().addAll("btn", "btn-primary");
         actualiser.setOnAction(e -> rafraichir());
 
-        FlowPane actions = new FlowPane(10, 10, nouveau, modifier, supprimer, toggleActif, resetPassword, actualiser);
+        FlowPane actions = new FlowPane(10, 10, nouveau, modifier, supprimer, toggleActif, resetPassword,
+                toggleTitulaire, actualiser);
         actions.setAlignment(Pos.CENTER);
         actions.getStyleClass().add("action-bar");
 
@@ -114,12 +128,17 @@ public class EnseignantScreen {
         colActif.setCellValueFactory(cell ->
                 new javafx.beans.property.SimpleStringProperty(cell.getValue().isActif() ? "Oui" : "Non"));
 
+        TableColumn<Enseignant, String> colTitulaire = new TableColumn<>("Titulaire");
+        colTitulaire.setCellValueFactory(cell ->
+                new javafx.beans.property.SimpleStringProperty(cell.getValue().isTitulaire() ? "Oui" : "Non"));
+
         TableColumn<Enseignant, String> colClasses = new TableColumn<>("Classes");
         colClasses.setCellValueFactory(cell -> new javafx.beans.property.SimpleStringProperty(
                 String.join(", ", enseignantService.listerClassesConcernees(cell.getValue().getIdEnseignant()))));
         colClasses.setPrefWidth(200);
 
-        table.getColumns().setAll(List.of(colNom, colPrenom, colEmail, colLogin, colMatiere, colClasses, colActif));
+        table.getColumns().setAll(List.of(colNom, colPrenom, colEmail, colLogin, colMatiere, colClasses,
+                colActif, colTitulaire));
     }
 
     private void rafraichir() {
@@ -140,6 +159,15 @@ public class EnseignantScreen {
     private void toggleActif(Enseignant enseignant) {
         try {
             enseignantService.toggleActif(enseignant.getIdEnseignant());
+            rafraichir();
+        } catch (IllegalArgumentException ex) {
+            ScreenUtils.showError(ex.getMessage());
+        }
+    }
+
+    private void toggleTitulaire(Enseignant enseignant) {
+        try {
+            enseignantService.toggleTitulaire(enseignant.getIdEnseignant());
             rafraichir();
         } catch (IllegalArgumentException ex) {
             ScreenUtils.showError(ex.getMessage());
@@ -187,6 +215,27 @@ public class EnseignantScreen {
         passwordField.setPromptText(edition ? "(non modifiable ici)" : "Mot de passe initial");
         passwordField.setDisable(edition);
 
+        ListView<Classe> classesListView = new ListView<>(
+                FXCollections.observableArrayList(classeService.listerToutesLesClasses()));
+        classesListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        classesListView.setPrefHeight(120);
+        classesListView.setCellFactory(lv -> new ListCell<>() {
+            @Override
+            protected void updateItem(Classe classe, boolean empty) {
+                super.updateItem(classe, empty);
+                setText(empty || classe == null ? null : classe.getNiveau());
+            }
+        });
+        if (edition) {
+            List<Integer> assignees = enseignantService.listerClasseIds(existant.getIdEnseignant());
+            List<Classe> items = classesListView.getItems();
+            for (int i = 0; i < items.size(); i++) {
+                if (assignees.contains(items.get(i).getIdClasse())) {
+                    classesListView.getSelectionModel().select(i);
+                }
+            }
+        }
+
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
@@ -196,6 +245,7 @@ public class EnseignantScreen {
         grid.addRow(2, new Label("Email :"), emailField);
         grid.addRow(3, new Label("Login :"), loginField);
         grid.addRow(4, new Label("Mot de passe :"), passwordField);
+        grid.addRow(5, new Label("Classes :"), classesListView);
 
         dialog.getDialogPane().setContent(grid);
 
@@ -204,18 +254,26 @@ public class EnseignantScreen {
             return;
         }
 
+        List<Integer> classeIds = classesListView.getSelectionModel().getSelectedItems().stream()
+                .map(Classe::getIdClasse)
+                .collect(Collectors.toList());
+
         try {
+            Integer idEnseignant;
             if (edition) {
                 existant.setNom(nomField.getText());
                 existant.setPrenom(prenomField.getText());
                 existant.setEmail(emailField.getText());
                 existant.setLogin(loginField.getText());
                 enseignantService.modifierEnseignant(existant);
+                idEnseignant = existant.getIdEnseignant();
             } else {
                 Enseignant nouveau = new Enseignant(null, nomField.getText(), prenomField.getText(), emailField.getText());
                 nouveau.setLogin(loginField.getText());
-                enseignantService.creerEnseignant(nouveau, passwordField.getText());
+                Enseignant cree = enseignantService.creerEnseignant(nouveau, passwordField.getText());
+                idEnseignant = cree.getIdEnseignant();
             }
+            enseignantService.assignerClasses(idEnseignant, classeIds);
             rafraichir();
         } catch (IllegalArgumentException ex) {
             ScreenUtils.showError(ex.getMessage());

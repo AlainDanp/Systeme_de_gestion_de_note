@@ -30,6 +30,7 @@ gestion_Etudiant\vue\EtudiantView.class
 BD\DataSourceProvider$1.class
 fxui\Navigator.class
 Event\listener\FileLoggerListener.class
+fxui\screen\EnseignantScreen$1.class
 Admin\model\Admin.class
 fxui\BulletinPdfExporter.class
 Event\UserLoginEvent.class

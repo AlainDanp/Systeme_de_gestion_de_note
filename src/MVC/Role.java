@@ -1,7 +1,8 @@
 package MVC;
 
 public enum Role {
-    ENSEIGNANT("Enseignant", "Accès complet aux notes, bulletins et matières"),
+    ENSEIGNANT("Enseignant", "Accès à ses propres notes et matières uniquement"),
+    TITULAIRE("Titulaire", "Enseignant responsable : génère, modifie et supprime les bulletins"),
     ETUDIANT("Étudiant", "Consultation uniquement de ses propres données"),
     ADMIN("Administrateur", "Accès complet au système");
 

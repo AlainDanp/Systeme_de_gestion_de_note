@@ -33,6 +33,7 @@ import gestion_Note.service.NoteServiceImpl;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * Point d'entrée unique du bootstrap applicatif (DataSource, DAO, services, événements).
@@ -98,6 +99,8 @@ public final class AppContext {
             return null;
         }
 
+        appliquerMigrations(dataSource);
+
         EventDispatcher eventDispatcher = EventDispatcher.getInstance();
         NotificationListener notificationListener = new NotificationListener();
         StatisticsListener statisticsListener = new StatisticsListener();
@@ -129,6 +132,27 @@ public final class AppContext {
         return new AppContext(dataSource, securityContext, eventDispatcher, notificationListener,
                 statisticsListener, authenticationService, noteService, bulletinService,
                 matiereService, enseignantService, etudiantService, classeService);
+    }
+
+    /**
+     * Applique les évolutions de schéma non destructives nécessaires aux nouvelles fonctionnalités,
+     * en l'absence d'outil de migration dans ce projet. Idempotent (IF NOT EXISTS), sûr à rejouer
+     * à chaque démarrage sans perte de données existantes.
+     */
+    private static void appliquerMigrations(DataSource dataSource) {
+        try (Connection c = dataSource.getConnection(); Statement st = c.createStatement()) {
+            st.execute("ALTER TABLE enseignant ADD COLUMN IF NOT EXISTS titulaire BOOLEAN NOT NULL DEFAULT FALSE");
+        } catch (SQLException e) {
+            System.err.println("Avertissement : impossible d'appliquer la migration 'titulaire' : " + e.getMessage());
+        }
+        try (Connection c = dataSource.getConnection(); Statement st = c.createStatement()) {
+            st.execute("CREATE TABLE IF NOT EXISTS enseignant_classe (" +
+                    "id_enseignant INT NOT NULL REFERENCES enseignant(id_enseignant) ON DELETE CASCADE, " +
+                    "id_classe INT NOT NULL REFERENCES classe(id_classe) ON DELETE CASCADE, " +
+                    "PRIMARY KEY (id_enseignant, id_classe))");
+        } catch (SQLException e) {
+            System.err.println("Avertissement : impossible d'appliquer la migration 'enseignant_classe' : " + e.getMessage());
+        }
     }
 
     private static boolean testerConnexion(DataSource dataSource) {

@@ -206,7 +206,7 @@ public class NoteScreen {
         try {
             table.setItems(FXCollections.observableArrayList(noteService.listerNotesParMatiere(matiere)));
             table.refresh();
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | SecurityException ex) {
             ScreenUtils.showError(ex.getMessage());
         }
     }

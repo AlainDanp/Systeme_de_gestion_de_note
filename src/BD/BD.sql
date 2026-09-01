@@ -34,6 +34,7 @@ CREATE TABLE enseignant (
     login              VARCHAR(50)  NOT NULL UNIQUE,
     password_hash      VARCHAR(255) NOT NULL,
     actif              BOOLEAN   DEFAULT TRUE,
+    titulaire          BOOLEAN NOT NULL DEFAULT FALSE,
     derniere_connexion TIMESTAMP,
     created_at         TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -53,7 +54,7 @@ CREATE TABLE etudiant(
 
 CREATE TABLE matiere(
     nom VARCHAR(100) PRIMARY KEY,
-    coefficient INT NOT NULL,
+    coefficient INT NOT NULL DEFAULT 1,
     id_enseignant INT REFERENCES enseignant(id_enseignant) ON DELETE SET NULL
 );
 
@@ -66,6 +67,12 @@ CREATE TABLE note(
     valeur NUMERIC(5, 2) NOT NULL CHECK ( valeur >= 0 AND valeur <= 20),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT note_unique_par_periode UNIQUE (id_etudiant, nom_matiere, periode)
+);
+
+CREATE TABLE enseignant_classe (
+    id_enseignant INT NOT NULL REFERENCES enseignant(id_enseignant) ON DELETE CASCADE,
+    id_classe INT NOT NULL REFERENCES classe(id_classe) ON DELETE CASCADE,
+    PRIMARY KEY (id_enseignant, id_classe)
 );
 
 CREATE TABLE bulletin(

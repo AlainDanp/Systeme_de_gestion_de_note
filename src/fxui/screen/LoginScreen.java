@@ -24,6 +24,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 
+import java.util.List;
 import java.util.Optional;
 
 /** Écran de connexion (refonte Figma) : panneau illustré à gauche, formulaire à droite. */
@@ -147,12 +148,15 @@ public class LoginScreen {
             User user = resultat.get();
             SecurityContext securityContext = appContext.getSecurityContext();
             String matiere = (user instanceof Enseignant) ? ((Enseignant) user).getMatiereNom() : null;
-            securityContext.setUser(user.getId(), user.getNomComplet(), user.getRole(), matiere);
+            List<Integer> classeIds = (user instanceof Enseignant)
+                    ? appContext.getEnseignantService().listerClasseIds(user.getId())
+                    : List.of();
+            securityContext.setUser(user.getId(), user.getNomComplet(), user.getRole(), matiere, classeIds);
 
             if (user.getRole() == Role.ADMIN) {
                 navigator.show(new AdminDashboardScreen(appContext, navigator, user).build(),
                         "Tableau de bord - Administrateur");
-            } else if (user.getRole() == Role.ENSEIGNANT) {
+            } else if (user.getRole() == Role.ENSEIGNANT || user.getRole() == Role.TITULAIRE) {
                 navigator.show(new EnseignantDashboardScreen(appContext, navigator, user).build(),
                         "Tableau de bord - Enseignant");
             } else if (user.getRole() == Role.ETUDIANT) {

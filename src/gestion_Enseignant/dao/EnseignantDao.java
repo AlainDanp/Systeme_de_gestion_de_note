@@ -84,6 +84,69 @@ public class EnseignantDao {
         }
     }
 
+    public List<Integer> findClasseIds(int idEnseignant) {
+        String sql = "SELECT id_classe FROM enseignant_classe WHERE id_enseignant = ? ORDER BY id_classe";
+        List<Integer> ids = new ArrayList<>();
+        try (Connection c = ds.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, idEnseignant);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ids.add(rs.getInt("id_classe"));
+                }
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException("Erreur lors de la récupération des classes assignées", ex);
+        }
+        return ids;
+    }
+
+    /** Remplace l'ensemble des classes assignées à l'enseignant par la liste fournie. */
+    public void assignerClasses(int idEnseignant, List<Integer> classeIds) {
+        String deleteSql = "DELETE FROM enseignant_classe WHERE id_enseignant = ?";
+        String insertSql = "INSERT INTO enseignant_classe (id_enseignant, id_classe) VALUES (?, ?)";
+
+        try (Connection c = ds.getConnection()) {
+            c.setAutoCommit(false);
+            try {
+                try (PreparedStatement del = c.prepareStatement(deleteSql)) {
+                    del.setInt(1, idEnseignant);
+                    del.executeUpdate();
+                }
+                try (PreparedStatement ins = c.prepareStatement(insertSql)) {
+                    for (Integer classeId : classeIds) {
+                        ins.setInt(1, idEnseignant);
+                        ins.setInt(2, classeId);
+                        ins.addBatch();
+                    }
+                    ins.executeBatch();
+                }
+                c.commit();
+            } catch (SQLException ex) {
+                c.rollback();
+                throw ex;
+            } finally {
+                c.setAutoCommit(true);
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException("Erreur lors de l'assignation des classes", ex);
+        }
+    }
+
+    public void updateTitulaire(int idEnseignant, boolean titulaire) {
+        String sql = "UPDATE Enseignant SET titulaire = ? WHERE id_enseignant = ?";
+
+        try (Connection c = ds.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setBoolean(1, titulaire);
+            ps.setInt(2, idEnseignant);
+            ps.executeUpdate();
+
+        } catch (SQLException ex) {
+            throw new RuntimeException("Erreur lors de la mise à jour du statut titulaire", ex);
+        }
+    }
+
     public void updateDerniereConnexion(int idEnseignant) {
         String sql = "UPDATE Enseignant SET derniere_connexion = CURRENT_TIMESTAMP WHERE id_enseignant = ?";
 
@@ -100,7 +163,7 @@ public class EnseignantDao {
     public Optional<Enseignant> findById(int id) {
         String sql =
                 "SELECT e.id_enseignant, e.nom, e.prenom, e.email, e.login, e.password_hash, " +
-                        "       e.actif, e.derniere_connexion, m.nom as matiere_nom " +
+                        "       e.actif, e.titulaire, e.derniere_connexion, m.nom as matiere_nom " +
                         "FROM Enseignant e " +
                         "LEFT JOIN Matiere m ON e.id_enseignant = m.id_enseignant " +
                         "WHERE e.id_enseignant = ?";
@@ -122,7 +185,7 @@ public class EnseignantDao {
     public Optional<Enseignant> findByLogin(String login) {
         String sql =
                 "SELECT e.id_enseignant, e.nom, e.prenom, e.email, e.login, e.password_hash, " +
-                        "       e.actif, e.derniere_connexion, m.nom as matiere_nom " +
+                        "       e.actif, e.titulaire, e.derniere_connexion, m.nom as matiere_nom " +
                         "FROM Enseignant e " +
                         "LEFT JOIN Matiere m ON e.id_enseignant = m.id_enseignant " +
                         "WHERE e.login = ?";
@@ -157,7 +220,7 @@ public class EnseignantDao {
     public List<Enseignant> findAll() {
         String sql =
                 "SELECT e.id_enseignant, e.nom, e.prenom, e.email, e.login, e.password_hash, " +
-                        "       e.actif, e.derniere_connexion, m.nom as matiere_nom " +
+                        "       e.actif, e.titulaire, e.derniere_connexion, m.nom as matiere_nom " +
                         "FROM Enseignant e " +
                         "LEFT JOIN Matiere m ON e.id_enseignant = m.id_enseignant " +
                         "ORDER BY e.nom, e.prenom";
@@ -202,6 +265,7 @@ public class EnseignantDao {
         e.setLogin(rs.getString("login"));
         e.setPasswordHash(rs.getString("password_hash"));
         e.setActif(rs.getBoolean("actif"));
+        e.setTitulaire(rs.getBoolean("titulaire"));
 
         Timestamp ts = rs.getTimestamp("derniere_connexion");
         if (ts != null) {

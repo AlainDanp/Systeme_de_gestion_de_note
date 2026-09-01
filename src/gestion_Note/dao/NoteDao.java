@@ -65,7 +65,7 @@ public class NoteDao {
     public Optional<Note> findById(int id) {
         String sql =
                 "SELECT n.id, n.id_etudiant, n.periode, n.nom_matiere, n.valeur, n.created_at, " +
-                        "       e.nom as etudiant_nom, e.prenom as etudiant_prenom, " +
+                        "       e.nom as etudiant_nom, e.prenom as etudiant_prenom, e.classe_id, " +
                         "       ens.nom as enseignant_nom, ens.prenom as enseignant_prenom " +
                         "FROM note n " +
                         "JOIN etudiant e ON n.id_etudiant = e.id " +
@@ -100,7 +100,7 @@ public class NoteDao {
     public List<Note> findByEtudiant(int etudiantId) {
         String sql =
                 "SELECT n.id, n.id_etudiant, n.periode, n.nom_matiere, n.valeur, n.created_at, " +
-                        "       e.nom as etudiant_nom, e.prenom as etudiant_prenom, " +
+                        "       e.nom as etudiant_nom, e.prenom as etudiant_prenom, e.classe_id, " +
                         "       ens.nom as enseignant_nom, ens.prenom as enseignant_prenom " +
                         "FROM note n " +
                         "JOIN etudiant e ON n.id_etudiant = e.id " +
@@ -115,7 +115,7 @@ public class NoteDao {
     public List<Note> findByEtudiantAndPeriode(int etudiantId, String periode) {
         String sql =
                 "SELECT n.id, n.id_etudiant, n.periode, n.nom_matiere, n.valeur, n.created_at, " +
-                        "       e.nom as etudiant_nom, e.prenom as etudiant_prenom, " +
+                        "       e.nom as etudiant_nom, e.prenom as etudiant_prenom, e.classe_id, " +
                         "       ens.nom as enseignant_nom, ens.prenom as enseignant_prenom " +
                         "FROM note n " +
                         "JOIN etudiant e ON n.id_etudiant = e.id " +
@@ -143,7 +143,7 @@ public class NoteDao {
     public List<Note> findByPeriode(String periode) {
         String sql =
                 "SELECT n.id, n.id_etudiant, n.periode, n.nom_matiere, n.valeur, n.created_at, " +
-                        "       e.nom as etudiant_nom, e.prenom as etudiant_prenom, " +
+                        "       e.nom as etudiant_nom, e.prenom as etudiant_prenom, e.classe_id, " +
                         "       ens.nom as enseignant_nom, ens.prenom as enseignant_prenom " +
                         "FROM note n " +
                         "JOIN etudiant e ON n.id_etudiant = e.id " +
@@ -170,7 +170,7 @@ public class NoteDao {
     public List<Note> findByMatiere(String matiere) {
         String sql =
                 "SELECT n.id, n.id_etudiant, n.periode, n.nom_matiere, n.valeur, n.created_at, " +
-                        "       e.nom as etudiant_nom, e.prenom as etudiant_prenom, " +
+                        "       e.nom as etudiant_nom, e.prenom as etudiant_prenom, e.classe_id, " +
                         "       ens.nom as enseignant_nom, ens.prenom as enseignant_prenom " +
                         "FROM note n " +
                         "JOIN etudiant e ON n.id_etudiant = e.id " +
@@ -197,7 +197,7 @@ public class NoteDao {
     public List<Note> findAll() {
         String sql =
                 "SELECT n.id, n.id_etudiant, n.periode, n.nom_matiere, n.valeur, n.created_at, " +
-                        "       e.nom as etudiant_nom, e.prenom as etudiant_prenom, " +
+                        "       e.nom as etudiant_nom, e.prenom as etudiant_prenom, e.classe_id, " +
                         "       ens.nom as enseignant_nom, ens.prenom as enseignant_prenom " +
                         "FROM note n " +
                         "JOIN etudiant e ON n.id_etudiant = e.id " +
@@ -253,6 +253,9 @@ public class NoteDao {
         }
 
         try {
+            int classeId = rs.getInt("classe_id");
+            if (!rs.wasNull()) n.setClasseId(classeId);
+
             String nom = rs.getString("etudiant_nom");
             if (nom != null) n.setEtudiantNom(nom);
 

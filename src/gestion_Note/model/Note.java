@@ -15,6 +15,7 @@ public class Note {
     private String etudiantPrenom;
     private String enseignantNom;
     private String enseignantPrenom;
+    private Integer classeId;
 
     public Note() {}
 
@@ -105,6 +106,14 @@ public class Note {
 
     public void setEnseignantPrenom(String enseignantPrenom) {
         this.enseignantPrenom = enseignantPrenom;
+    }
+
+    public Integer getClasseId() {
+        return classeId;
+    }
+
+    public void setClasseId(Integer classeId) {
+        this.classeId = classeId;
     }
 
     // Méthodes utilitaires

@@ -4,6 +4,7 @@ import Event.EventDispatcher;
 import Event.EventListener;
 import Event.NoteCreatedEvent;
 import Event.NoteUpdatedEvent;
+import MVC.Role;
 import MVC.SecurityContext;
 import gestion_Note.model.Note;
 import gestion_Note.dao.NoteDao;
@@ -137,7 +138,7 @@ public class NoteServiceImpl implements NoteService{
     public List<Note> listerNotesParEtudiant(Integer etudiantId) {
         if (etudiantId == null) throw new IllegalArgumentException("L'ID de l'étudiant est requis");
         securityContext.exigerAccesEtudiant(etudiantId);
-        return noteDao.findByEtudiant(etudiantId);
+        return filtrerSiRestreint(noteDao.findByEtudiant(etudiantId));
     }
 
     @Override
@@ -148,7 +149,7 @@ public class NoteServiceImpl implements NoteService{
         if (periode == null || periode.isBlank()) {
             throw new IllegalArgumentException("La période est requise");
         }
-        return noteDao.findByEtudiantAndPeriode(etudiantId, periode);
+        return filtrerSiRestreint(noteDao.findByEtudiantAndPeriode(etudiantId, periode));
     }
 
     @Override
@@ -156,7 +157,7 @@ public class NoteServiceImpl implements NoteService{
         if (periode == null || periode.isBlank()) {
             throw new IllegalArgumentException("La période est requise");
         }
-        return noteDao.findByPeriode(periode);
+        return filtrerSiRestreint(noteDao.findByPeriode(periode));
     }
 
     @Override
@@ -164,12 +165,45 @@ public class NoteServiceImpl implements NoteService{
         if (matiere == null || matiere.isBlank()) {
             throw new IllegalArgumentException("La matière est requise");
         }
-        return noteDao.findByMatiere(matiere);
+        if (estRestreintAUneMatiere()) {
+            String matiereEns = securityContext.getMatiere();
+            if (matiereEns == null || !matiereEns.equalsIgnoreCase(matiere)) {
+                throw new SecurityException("Accès refusé : vous ne pouvez consulter que les notes de votre matière"
+                        + (matiereEns == null ? "." : " (" + matiereEns + ")."));
+            }
+        }
+        return filtrerSiRestreint(noteDao.findByMatiere(matiere));
     }
 
     @Override
     public List<Note> listerToutesLesNotes() {
-        return noteDao.findAll();
+        return filtrerSiRestreint(noteDao.findAll());
+    }
+
+    /** Un Enseignant "simple" (non Titulaire, non Admin) ne voit que les notes de sa propre matière. */
+    private boolean estRestreintAUneMatiere() {
+        return securityContext.getRole() == Role.ENSEIGNANT;
+    }
+
+    /**
+     * Un Enseignant simple ne voit que les notes de sa matière ET dans une de ses classes assignées :
+     * un élève qui suit sa matière mais appartient à une classe non assignée reste invisible.
+     */
+    private List<Note> filtrerSiRestreint(List<Note> notes) {
+        if (!estRestreintAUneMatiere()) {
+            return notes;
+        }
+        String matiere = securityContext.getMatiere();
+        if (matiere == null) {
+            return new ArrayList<>();
+        }
+        List<Note> filtrees = new ArrayList<>();
+        for (Note n : notes) {
+            if (matiere.equalsIgnoreCase(n.getMatiere()) && securityContext.aClasseAssignee(n.getClasseId())) {
+                filtrees.add(n);
+            }
+        }
+        return filtrees;
     }
 
     @Override

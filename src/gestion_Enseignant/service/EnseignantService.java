@@ -14,7 +14,12 @@ public interface EnseignantService {
     Optional<Enseignant> getEnseignant(Integer id);
     List<Enseignant> listerTousLesEnseignants();
     void toggleActif(Integer id);
+    void toggleTitulaire(Integer id);
     String resetPassword(Integer id);
-    /** Classes ayant au moins un élève noté par cet enseignant (dérivé des notes, pas de lien direct en base). */
+    /** Classes explicitement assignées à cet enseignant. */
     List<String> listerClassesConcernees(Integer idEnseignant);
+    /** IDs des classes assignées, pour pré-remplir le formulaire d'édition. */
+    List<Integer> listerClasseIds(Integer idEnseignant);
+    /** Remplace l'ensemble des classes assignées à l'enseignant. */
+    void assignerClasses(Integer idEnseignant, List<Integer> classeIds);
 }

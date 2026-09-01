@@ -203,7 +203,7 @@ public class BulletinScreen {
                     + (bulletin.getMoyenne() == null ? "-" : bulletin.getMoyenne())
                     + ", moyenne classe = "
                     + (bulletin.getMoyennDelaClasse() == null ? "-" : bulletin.getMoyennDelaClasse()));
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | SecurityException ex) {
             ScreenUtils.showError(ex.getMessage());
         }
     }
@@ -256,7 +256,7 @@ public class BulletinScreen {
             table.refresh();
         } catch (NumberFormatException ex) {
             ScreenUtils.showError("Les moyennes doivent être numériques.");
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | SecurityException ex) {
             ScreenUtils.showError(ex.getMessage());
         }
     }
@@ -289,7 +289,7 @@ public class BulletinScreen {
             rafraichir();
         } catch (NumberFormatException ex) {
             ScreenUtils.showError("Les moyennes doivent être numériques.");
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | SecurityException ex) {
             ScreenUtils.showError(ex.getMessage());
         }
     }
@@ -304,7 +304,7 @@ public class BulletinScreen {
             table.getItems().remove(bulletin);
         } catch (SQLException ex) {
             ScreenUtils.showError("Erreur de connexion : " + ex.getMessage());
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException | SecurityException ex) {
             ScreenUtils.showError(ex.getMessage());
         }
     }

@@ -32,6 +32,7 @@ import gestion_Note.vue.NoteView;
 
 
 import javax.sql.DataSource;
+import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
@@ -147,7 +148,7 @@ public class Application {
 
            if (authenticatedUser.getRole() == Role.ADMIN) {
                menuAdminView.afficher();
-           } else if (authenticatedUser.getRole() == Role.ENSEIGNANT) {
+           } else if (authenticatedUser.getRole() == Role.ENSEIGNANT || authenticatedUser.getRole() == Role.TITULAIRE) {
                menuEnseignantView.afficher();
            } else if (authenticatedUser.getRole() == Role.ETUDIANT) {
                menuEtudiantView.afficher();
@@ -342,7 +343,10 @@ public class Application {
         }
 
         String matiere = (user instanceof Enseignant) ? ((Enseignant) user).getMatiereNom() : null;
-        securityContext.setUser(user.getId(), user.getNomComplet(), user.getRole(), matiere);
+        List<Integer> classeIds = (user instanceof Enseignant)
+                ? enseignantService.listerClasseIds(user.getId())
+                : List.of();
+        securityContext.setUser(user.getId(), user.getNomComplet(), user.getRole(), matiere, classeIds);
     }
     private void afficherStatistiquesSession() {
         System.out.println("\n╔════════════════════════════════════════════════════════════════╗");
