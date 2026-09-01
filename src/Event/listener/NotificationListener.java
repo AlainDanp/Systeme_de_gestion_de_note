@@ -19,8 +19,7 @@ public class NotificationListener implements EventListener<Event> {
 
     @Override
     public void onEvent(Event event) {
-        Notification notification = createNotification(event);
-        if (notification != null) {
+        for (Notification notification : creerNotifications(event)) {
             addNotification(notification);
         }
     }
@@ -30,7 +29,8 @@ public class NotificationListener implements EventListener<Event> {
         return new String[]{
                 "NOTE_CREATED", "NOTE_UPDATED", "NOTE_DELETED",
                 "BULLETIN_GENERATED",
-                "ETUDIANT_CREATED", "ENSEIGNANT_CREATED"
+                "ETUDIANT_CREATED", "ENSEIGNANT_CREATED",
+                "MATIERE_ENSEIGNANT_MODIFIE"
         };
     }
     @Override
@@ -38,73 +38,78 @@ public class NotificationListener implements EventListener<Event> {
         return "NotificationListener";
     }
 
-    private Notification createNotification(Event event) {
-        Notification notification = new Notification();
-        notification.setEventId(event.getEventId());
-        notification.setEventType(event.getEventType());
-        notification.setCreatedAt(event.getTimestamp());
-
+    private List<Notification> creerNotifications(Event event) {
         switch (event.getEventType()) {
             case "NOTE_CREATED" -> {
                 NoteCreatedEvent e = (NoteCreatedEvent) event;
-                notification.setMessage(String.format(
-                        "Nouvelle note en %s : %.2f/20",
-                        e.getMatiere(), e.getNote().getValeur()
-                ));
-                notification.setType(Notification.Type.SUCCESS);
-                notification.setUserId(e.getNote().getIdEtudiant());
-                return notification;
+                return List.of(notification(event, e.getNote().getIdEtudiant(), Notification.Type.SUCCESS,
+                        String.format("Nouvelle note en %s : %.2f/20", e.getMatiere(), e.getNote().getValeur())));
             }
 
             case "NOTE_UPDATED" -> {
                 NoteUpdatedEvent e = (NoteUpdatedEvent) event;
-                notification.setMessage(String.format(
-                        "Note modifiée en %s : %.2f → %.2f",
-                        e.getMatiere(), e.getAncienneValeur(), e.getNouvelleValeur()
-                ));
-                notification.setType(Notification.Type.INFO);
-                notification.setUserId(e.getNote().getIdEtudiant());
-                return notification;
+                return List.of(notification(event, e.getNote().getIdEtudiant(), Notification.Type.INFO,
+                        String.format("Note modifiée en %s : %.2f → %.2f",
+                                e.getMatiere(), e.getAncienneValeur(), e.getNouvelleValeur())));
             }
 
+            case "NOTE_DELETED" -> {
+                NoteDeletedEvent e = (NoteDeletedEvent) event;
+                return List.of(notification(event, e.getEtudiantId(), Notification.Type.INFO,
+                        String.format("Note de %.2f/20 supprimée en %s", e.getValeur(), e.getMatiere())));
+            }
 
             case "BULLETIN_GENERATED" -> {
                 BulletinGeneratedEvent e = (BulletinGeneratedEvent) event;
-                notification.setMessage(String.format(
-                        "Nouveau bulletin disponible - %s - Moyenne: %.2f/20",
-                        e.getBulletin().getPeriode(),
-                        e.getBulletin().getMoyenne() != null ? e.getBulletin().getMoyenne() : 0.0
-                ));
-                notification.setType(Notification.Type.SUCCESS);
-                notification.setUserId(e.getBulletin().getIdEtudiant());
-                return notification;
+                return List.of(notification(event, e.getBulletin().getIdEtudiant(), Notification.Type.SUCCESS,
+                        String.format("Nouveau bulletin disponible - %s - Moyenne: %.2f/20",
+                                e.getBulletin().getPeriode(),
+                                e.getBulletin().getMoyenne() != null ? e.getBulletin().getMoyenne() : 0.0)));
             }
 
             case "ETUDIANT_CREATED" -> {
                 EtudiantCreatedEvent e = (EtudiantCreatedEvent) event;
-                notification.setMessage(String.format(
-                        "Bienvenue sur la plateforme ! Votre compte a été créé avec succès."
-                ));
-                notification.setType(Notification.Type.SUCCESS);
-                notification.setUserId(e.getEtudiant().getIdEtudiant());
-                return notification;
+                return List.of(notification(event, e.getEtudiant().getIdEtudiant(), Notification.Type.SUCCESS,
+                        "Bienvenue sur la plateforme ! Votre compte a été créé avec succès."));
             }
 
             case "ENSEIGNANT_CREATED" -> {
                 EnseignantCreatedEvent e = (EnseignantCreatedEvent) event;
-                notification.setMessage(String.format(
-                        "Bienvenue sur la plateforme ! Votre compte enseignant a été créé."
-                ));
-                notification.setType(Notification.Type.SUCCESS);
-                notification.setUserId(e.getEnseignant().getIdEnseignant());
-                return notification;
+                return List.of(notification(event, e.getEnseignant().getIdEnseignant(), Notification.Type.SUCCESS,
+                        "Bienvenue sur la plateforme ! Votre compte enseignant a été créé."));
+            }
+
+            case "MATIERE_ENSEIGNANT_MODIFIE" -> {
+                MatiereEnseignantModifieEvent e = (MatiereEnseignantModifieEvent) event;
+                List<Notification> notifications = new ArrayList<>();
+                if (e.getNouvelEnseignantId() != null) {
+                    notifications.add(notification(event, e.getNouvelEnseignantId(), Notification.Type.SUCCESS,
+                            "Vous êtes désormais assigné à la matière " + e.getMatiere() + "."));
+                }
+                if (e.getAncienEnseignantId() != null) {
+                    notifications.add(notification(event, e.getAncienEnseignantId(), Notification.Type.INFO,
+                            "Vous n'êtes plus assigné à la matière " + e.getMatiere() + "."));
+                }
+                return notifications;
             }
 
             default -> {
-                return null;
+                return List.of();
             }
         }
     }
+
+    private Notification notification(Event event, Integer userId, Notification.Type type, String message) {
+        Notification notification = new Notification();
+        notification.setEventId(event.getEventId());
+        notification.setEventType(event.getEventType());
+        notification.setCreatedAt(event.getTimestamp());
+        notification.setUserId(userId);
+        notification.setType(type);
+        notification.setMessage(message);
+        return notification;
+    }
+
     /**
      * Ajouter une notification pour un utilisateur
      */

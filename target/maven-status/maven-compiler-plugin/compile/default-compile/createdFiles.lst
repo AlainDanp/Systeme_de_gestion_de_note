@@ -3,6 +3,7 @@ gestion_Bulletin\vue\BulletinView.class
 MVC\Role.class
 gestion_Classe\test\ClasseTest.class
 Event\EventListener.class
+Event\NoteDeletedEvent.class
 gestion_Etudiant\service\EtudiantService.class
 MVC\User.class
 logs\FileLoggerListener.class
@@ -16,6 +17,7 @@ fxui\EtudiantPicker$1.class
 gestion_Matiere\service\EnseignantInfo.class
 Event\EnseignantCreatedEvent.class
 gestion_Etudiant\service\EtudiantServiceImpl.class
+Event\MatiereEnseignantModifieEvent.class
 gestion_Enseignant\service\EnseignantServiceImpl.class
 gestion_Bulletin\model\NoteDetail.class
 gestion_Bulletin\service\BulletinService.class

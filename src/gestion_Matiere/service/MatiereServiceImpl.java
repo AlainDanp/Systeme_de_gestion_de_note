@@ -1,5 +1,7 @@
 package gestion_Matiere.service;
 
+import Event.EventDispatcher;
+import Event.MatiereEnseignantModifieEvent;
 import MVC.SecurityContext;
 import gestion_Matiere.dao.MatiereDao;
 import gestion_Matiere.model.Matiere;
@@ -18,11 +20,20 @@ public class MatiereServiceImpl implements MatiereService {
     private final DataSource ds;
     private final MatiereDao matiereDao;
     private final SecurityContext securityContext;
+    private final EventDispatcher eventDispatcher;
+    private Integer currentUserId;
+    private String currentUserName;
 
     public MatiereServiceImpl(DataSource ds, MatiereDao matiereDao, SecurityContext securityContext) {
         this.ds = ds;
         this.matiereDao = matiereDao;
         this.securityContext = securityContext;
+        this.eventDispatcher = EventDispatcher.getInstance();
+    }
+
+    public void setCurrentUser(Integer userId, String userName) {
+        this.currentUserId = userId;
+        this.currentUserName = userName;
     }
 
     @Override
@@ -64,6 +75,7 @@ public class MatiereServiceImpl implements MatiereService {
 
         // Vérifier que le nouvel enseignant n'est pas déjà assigné
         Optional<Matiere> ancienneMatiere = matiereDao.findByNom(matiere.getNom());
+        Integer ancienEnseignantId = ancienneMatiere.map(Matiere::getIdEnseignant).orElse(null);
         if (ancienneMatiere.isPresent() &&
                 !ancienneMatiere.get().getIdEnseignant().equals(matiere.getIdEnseignant()) &&
                 enseignantDejaAssigne(matiere.getIdEnseignant())) {
@@ -71,6 +83,12 @@ public class MatiereServiceImpl implements MatiereService {
         }
 
         matiereDao.update(matiere);
+
+        boolean enseignantChange = ancienEnseignantId != null && !ancienEnseignantId.equals(matiere.getIdEnseignant());
+        if (enseignantChange && currentUserId != null && currentUserName != null) {
+            eventDispatcher.dispatch(new MatiereEnseignantModifieEvent(
+                    currentUserId, currentUserName, matiere.getNom(), ancienEnseignantId, matiere.getIdEnseignant()));
+        }
     }
 
     @Override

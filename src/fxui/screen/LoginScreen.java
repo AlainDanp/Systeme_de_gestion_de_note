@@ -7,7 +7,12 @@ import MVC.User;
 import core.AppContext;
 import fxui.Navigator;
 import fxui.ScreenUtils;
+import gestion_Bulletin.service.BulletinServiceImpl;
 import gestion_Enseignant.model.Enseignant;
+import gestion_Enseignant.service.EnseignantServiceImpl;
+import gestion_Etudiant.service.EtudiantServiceImpl;
+import gestion_Matiere.service.MatiereServiceImpl;
+import gestion_Note.service.NoteServiceImpl;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -152,6 +157,7 @@ public class LoginScreen {
                     ? appContext.getEnseignantService().listerClasseIds(user.getId())
                     : List.of();
             securityContext.setUser(user.getId(), user.getNomComplet(), user.getRole(), matiere, classeIds);
+            configurerUtilisateurCourant(user);
 
             if (user.getRole() == Role.ADMIN) {
                 navigator.show(new AdminDashboardScreen(appContext, navigator, user).build(),
@@ -167,6 +173,32 @@ public class LoginScreen {
             }
         } catch (IllegalStateException ex) {
             erreur.setText(ex.getMessage());
+        }
+    }
+
+    /**
+     * Propage l'utilisateur connecté aux services métier : sans ça, {@code currentUserId} reste
+     * null dans chaque *ServiceImpl et aucun événement (donc aucune notification) n'est jamais
+     * déclenché. Miroir de Application.configurerUtilisateurCourant() côté console.
+     */
+    private void configurerUtilisateurCourant(User user) {
+        Integer id = user.getId();
+        String nom = user.getNomComplet();
+
+        if (appContext.getNoteService() instanceof NoteServiceImpl impl) {
+            impl.setCurrentUser(id, nom);
+        }
+        if (appContext.getBulletinService() instanceof BulletinServiceImpl impl) {
+            impl.setCurrentUser(id, nom);
+        }
+        if (appContext.getMatiereService() instanceof MatiereServiceImpl impl) {
+            impl.setCurrentUser(id, nom);
+        }
+        if (appContext.getEnseignantService() instanceof EnseignantServiceImpl impl) {
+            impl.setCurrentUser(id, nom);
+        }
+        if (appContext.getEtudiantService() instanceof EtudiantServiceImpl impl) {
+            impl.setCurrentUser(id, nom);
         }
     }
 }

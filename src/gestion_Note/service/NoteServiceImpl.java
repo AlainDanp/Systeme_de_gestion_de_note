@@ -3,6 +3,7 @@ package gestion_Note.service;
 import Event.EventDispatcher;
 import Event.EventListener;
 import Event.NoteCreatedEvent;
+import Event.NoteDeletedEvent;
 import Event.NoteUpdatedEvent;
 import MVC.Role;
 import MVC.SecurityContext;
@@ -124,6 +125,11 @@ public class NoteServiceImpl implements NoteService{
             throw new IllegalArgumentException("L'ID est requis");
         }
         noteDao.delete(c,id);
+
+        if (currentUserId != null && currentUserName != null) {
+            eventDispatcher.dispatch(new NoteDeletedEvent(
+                    currentUserId, currentUserName, existante, existante.getEtudiantNomComplet()));
+        }
     }
 
     @Override

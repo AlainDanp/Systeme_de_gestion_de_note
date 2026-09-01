@@ -20,7 +20,9 @@ C:\Users\alain\OneDrive\Documents\X4(ESIEA)\Dev Software (Majeur)\Conception d'a
 C:\Users\alain\OneDrive\Documents\X4(ESIEA)\Dev Software (Majeur)\Conception d'application\Conception\td_conception_application\src\Event\listener\FileLoggerListener.java
 C:\Users\alain\OneDrive\Documents\X4(ESIEA)\Dev Software (Majeur)\Conception d'application\Conception\td_conception_application\src\Event\listener\NotificationListener.java
 C:\Users\alain\OneDrive\Documents\X4(ESIEA)\Dev Software (Majeur)\Conception d'application\Conception\td_conception_application\src\Event\listener\StatisticsListener.java
+C:\Users\alain\OneDrive\Documents\X4(ESIEA)\Dev Software (Majeur)\Conception d'application\Conception\td_conception_application\src\Event\MatiereEnseignantModifieEvent.java
 C:\Users\alain\OneDrive\Documents\X4(ESIEA)\Dev Software (Majeur)\Conception d'application\Conception\td_conception_application\src\Event\NoteCreatedEvent.java
+C:\Users\alain\OneDrive\Documents\X4(ESIEA)\Dev Software (Majeur)\Conception d'application\Conception\td_conception_application\src\Event\NoteDeletedEvent.java
 C:\Users\alain\OneDrive\Documents\X4(ESIEA)\Dev Software (Majeur)\Conception d'application\Conception\td_conception_application\src\Event\NoteUpdatedEvent.java
 C:\Users\alain\OneDrive\Documents\X4(ESIEA)\Dev Software (Majeur)\Conception d'application\Conception\td_conception_application\src\Event\UserLoginEvent.java
 C:\Users\alain\OneDrive\Documents\X4(ESIEA)\Dev Software (Majeur)\Conception d'application\Conception\td_conception_application\src\Event\UserLogoutEvent.java

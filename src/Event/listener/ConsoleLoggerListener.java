@@ -33,7 +33,8 @@ public class ConsoleLoggerListener implements EventListener<Event> {
                 "NOTE_CREATED", "NOTE_UPDATED", "NOTE_DELETED",
                 "BULLETIN_GENERATED",
                 "USER_LOGIN", "USER_LOGOUT",
-                "ETUDIANT_CREATED", "ENSEIGNANT_CREATED"
+                "ETUDIANT_CREATED", "ENSEIGNANT_CREATED",
+                "MATIERE_ENSEIGNANT_MODIFIE"
         };
     }
 

@@ -335,6 +335,9 @@ public class Application {
         if (bulletinService instanceof BulletinServiceImpl) {
             ((BulletinServiceImpl) bulletinService).setCurrentUser(user.getId(), user.getNomComplet());
         }
+        if (matiereService instanceof gestion_Matiere.service.MatiereServiceImpl) {
+            ((gestion_Matiere.service.MatiereServiceImpl) matiereService).setCurrentUser(user.getId(), user.getNomComplet());
+        }
         if (enseignantService instanceof EnseignantServiceImpl) {
             ((EnseignantServiceImpl) enseignantService).setCurrentUser(user.getId(), user.getNomComplet());
         }

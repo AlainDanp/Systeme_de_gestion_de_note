@@ -117,3 +117,26 @@
 [2026-09-01 18:32:42] [USER_LOGIN] User=tso tso Daniella (8) | Connexion réussie - Rôle: Enseignant | EventID=50b294d0-f5c6-49c7-a56e-6acbc51d59c0
 [2026-09-01 18:33:39] [USER_LOGOUT] User=tso tso Daniella (8) | Déconnexion | EventID=cd2b6384-2707-4edd-a1d7-5075105e8359
 [2026-09-01 18:33:45] [USER_LOGIN] User=Paul Alain (6) | Connexion réussie - Rôle: Étudiant | EventID=c24cb06f-6aeb-4918-9fee-3938d0520535
+[2026-09-01 18:35:31] [USER_LOGOUT] User=Paul Alain (6) | Déconnexion | EventID=61c9df3e-87c7-4a70-897e-4278595cc996
+[2026-09-01 18:40:02] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=5d65fde1-b6fd-4b74-b060-73bd0a822995
+[2026-09-01 18:41:16] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=e9be70be-7128-41f4-972f-a5fe18e910f8
+[2026-09-01 18:41:35] [USER_LOGIN] User=tso tso Daniella (8) | Connexion réussie - Rôle: Enseignant | EventID=2badb2f9-63cc-4e67-83be-5d1d43705521
+[2026-09-01 18:42:03] [NOTE_CREATED] User=tso tso Daniella (8) | Note de 9,00/20 créée pour Étudiant #2 en Chime | EventID=3c3749e8-0dba-4364-9dd8-a99acca75c7a
+[2026-09-01 18:42:27] [USER_LOGOUT] User=tso tso Daniella (8) | Déconnexion | EventID=b8150ea2-9f89-4546-810e-8ebb732bdbce
+[2026-09-01 18:42:38] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=ef3ea89b-6e81-4adf-9cce-a3dd6555a088
+[2026-09-01 18:43:22] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=fa5399ab-57c2-414f-8fa3-193550e7c052
+[2026-09-01 18:44:00] [USER_LOGIN] User=tso tso Daniella (8) | Connexion réussie - Rôle: Enseignant | EventID=43c83eab-f7bb-4efb-b3cc-13443206f872
+[2026-09-01 18:44:11] [NOTE_UPDATED] User=tso tso Daniella (8) | Note de Marie Martin modifiée de 9,00 à 9,50 en Chime | EventID=1beb609e-40cb-4d59-8ffe-ff43dcabdcd7
+[2026-09-01 18:44:19] [NOTE_UPDATED] User=tso tso Daniella (8) | Note de Paul Alain modifiée de 12,00 à 12,50 en Chime | EventID=2277eade-835d-445e-8952-b23cce5df6b6
+[2026-09-01 18:44:25] [USER_LOGOUT] User=tso tso Daniella (8) | Déconnexion | EventID=cb591e60-f690-4f24-930f-c2d9a96dc66b
+[2026-09-01 18:44:35] [USER_LOGIN] User=Paul Alain (6) | Connexion réussie - Rôle: Étudiant | EventID=87ffb6ba-f18d-4e23-a73f-9f87e432848b
+[2026-09-01 18:45:51] [USER_LOGOUT] User=Paul Alain (6) | Déconnexion | EventID=538f01ff-978b-4065-b3f1-f2bd599393da
+[2026-09-01 18:45:56] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=ce5373da-5816-49b9-9d01-4dbe67668652
+[2026-09-01 18:46:27] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=a1d880c4-baa2-4a1b-8b27-eb5c18eb64b8
+[2026-09-01 18:47:28] [USER_LOGIN] User=tso tso Daniella (8) | Connexion réussie - Rôle: Titulaire | EventID=ae9d1a02-1b8b-414a-8b79-80ec85be1536
+[2026-09-01 18:55:47] [USER_LOGIN] User=Système Administrateur (1) | Connexion réussie - Rôle: Administrateur | EventID=8363da08-bf5a-4202-9a7c-d8336884541a
+[2026-09-01 18:55:55] [USER_LOGOUT] User=Système Administrateur (1) | Déconnexion | EventID=4e733d75-612d-4a94-b777-f0cfcc4b6568
+[2026-09-01 18:56:01] [USER_LOGIN] User=tso tso Daniella (8) | Connexion réussie - Rôle: Titulaire | EventID=bf85e9af-f2e6-41f8-85bb-1dbfbf462d78
+[2026-09-01 18:56:29] [USER_LOGOUT] User=tso tso Daniella (8) | Déconnexion | EventID=8eefebd4-4dc2-494e-bf45-dd35139e8750
+[2026-09-01 18:56:35] [USER_LOGIN] User=michael lordis (7) | Connexion réussie - Rôle: Enseignant | EventID=8530d2c9-98f1-4111-8bed-b3840d377a32
+[2026-09-01 18:56:45] [USER_LOGOUT] User=michael lordis (7) | Déconnexion | EventID=2904d920-153e-4b84-b03a-f191cf4eb958
